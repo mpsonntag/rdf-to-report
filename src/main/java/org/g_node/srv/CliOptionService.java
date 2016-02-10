@@ -68,7 +68,7 @@ public final class CliOptionService {
                 reports.toString());
         final String desc = !altDesc.isEmpty() ? altDesc : defaultDesc;
 
-        return Option.builder("-r")
+        return Option.builder("r")
                 .longOpt("report")
                 .desc(desc)
                 .required()
