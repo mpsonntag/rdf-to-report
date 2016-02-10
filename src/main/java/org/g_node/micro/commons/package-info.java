@@ -10,4 +10,4 @@
  * Provides interfaces, utility classes and methods for the g-node RDF microservice framework.
  */
 
-package org.g_node.commons;
+package org.g_node.micro.commons;
