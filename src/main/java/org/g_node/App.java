@@ -10,14 +10,18 @@
 
 package org.g_node;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.log4j.Logger;
 import org.g_node.micro.commons.AppUtils;
+import org.g_node.micro.commons.CliToolController;
+import org.g_node.reporter.LKTLogbook.CliLKTController;
 
 /**
  * Main application class used to parse command line input and pass
  * information to the appropriate modules.
- *
- * This application is a prototype, don't hate me if stuff is partially suboptimal or outright sucks.
  *
  * @author Michael Sonntag (sonntag@bio.lmu.de)
  */
@@ -27,6 +31,16 @@ public class App {
      * Access to the main log4j LOGGER.
      */
     private static final Logger LOGGER = Logger.getLogger(App.class.getName());
+    /**
+     * Hash map of all implemented report tools mapping a string to the corresponding controller class.
+     */
+    private static final Map<String, CliToolController> REGISTRY = Collections.unmodifiableMap(
+        new HashMap<String, CliToolController>() {
+            {
+                put("lkt", new CliLKTController());
+            }
+        }
+    );
 
     /**
      * Main method of the CLI framework.
@@ -38,13 +52,14 @@ public class App {
         App.LOGGER.info(String.join("", AppUtils.getTimeStamp("dd.MM.yyyy HH:mm"), ", Starting logfile."));
         App.LOGGER.info(String.join("", "Input arguments: '", String.join(" ", args), "'"));
 
-        if (args.length > 0) {
-            System.out.println("Implement CLI argument parsing here.");
+        if (args.length > 0 && App.REGISTRY.containsKey(args[0])) {
+            System.out.println("[DEBUG ] YAAAAY we have registered!");
         } else {
             App.LOGGER.error(
                     String.join("", "No existing report tool selected!",
                             "\n\t Please use syntax 'java -jar rdf-to-report.jar [reporter] [options]'",
-                            "\n\t e.g. 'java -jar rdf-to-report.jar default -i RdfFile.ttl -o outFile -f CVS'"
+                            "\n\t e.g. 'java -jar rdf-to-report.jar LKT -i RdfFile.ttl -o reportFile -f CVS'",
+                            "\n\t Available reporter tools: '", App.REGISTRY.keySet().toString(), "'."
                     )
             );
         }
