@@ -23,7 +23,7 @@ import org.g_node.srv.CliOptionService;
    *
  * @author Michael Sonntag (sonntag@bio.lmu.de)
  */
-public class CliLKTController implements CliToolController {
+public class LktCliController implements CliToolController {
     /**
      * Method returning the commandline options of the LKT reporter tool.
      *
