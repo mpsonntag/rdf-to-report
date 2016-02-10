@@ -10,10 +10,13 @@
 
 package org.g_node.reporter.LKTLogbook;
 
+import java.util.Collections;
+import java.util.List;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.g_node.micro.commons.CliToolController;
+import org.g_node.srv.CliOptionService;
 
 /**
  * Class handling how to fetch reports from an RDF file specific to the LKT Logbook use case of Kay Thurley.
@@ -28,61 +31,25 @@ public class CliLKTController implements CliToolController {
      */
     public final Options options() {
 
+        // TODO implement available reports
+        final List<String> reports = Collections.singletonList("default");
+
+        // TODO implement available output formats
+        final List<String> formats = Collections.singletonList("CSV");
+
         final Options options = new Options();
 
-        final Option opHelp = new Option("h", "help", false, "Print this message.");
-
-        final String inDesc = String.join("",
-                "RDF file containing the main database. ",
-                "Data for the required report will be fetched from this file.");
-
-        final Option opInRdfFile = Option.builder("i")
-                .longOpt("input-rdf")
-                .desc(inDesc)
-                .required()
-                .hasArg()
-                .valueSeparator()
-                .build();
-
-        // TODO implement available reports
-        final String reportDesc = String.join("",
-                "Reports available to the selected tool.");
-
-        final Option opReport = Option.builder("r")
-                .longOpt("report")
-                .desc(reportDesc)
-                .required()
-                .hasArg()
-                .valueSeparator()
-                .build();
-
-        final String outDesc = String.join("",
-                "Optional: Path and name of the output file. ",
-                "Files with the same name will be overwritten. ");
-
-        final Option opOut = Option.builder("o")
-                .longOpt("out-file")
-                .desc(outDesc)
-                .hasArg()
-                .valueSeparator()
-                .build();
-
-        final String formatDesc = String.join("",
-                "Optional: format of the report file that will be written.\n",
-                "\nDefault setting is the CSV format.");
-
-        final Option opFormat = Option.builder("f")
-                .longOpt("out-format")
-                .desc(formatDesc)
-                .hasArg()
-                .valueSeparator()
-                .build();
+        final Option opHelp = CliOptionService.getHelpOption("");
+        final Option opInRdfFile = CliOptionService.getInFileOption("");
+        final Option opReport = CliOptionService.getReportOption("", reports);
+        final Option opOutFile = CliOptionService.getOutFileOption("");
+        final Option opOutFormat = CliOptionService.getOutFormatOption("", formats);
 
         options.addOption(opHelp);
         options.addOption(opInRdfFile);
         options.addOption(opReport);
-        options.addOption(opOut);
-        options.addOption(opFormat);
+        options.addOption(opOutFile);
+        options.addOption(opOutFormat);
 
         return options;
     }
