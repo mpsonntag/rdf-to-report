@@ -14,6 +14,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 import org.g_node.micro.commons.AppUtils;
 import org.g_node.micro.commons.CliToolController;
@@ -53,7 +59,27 @@ public class App {
         App.LOGGER.info(String.join("", "Input arguments: '", String.join(" ", args), "'"));
 
         if (args.length > 0 && App.REGISTRY.containsKey(args[0])) {
-            System.out.println("[DEBUG ] YAAAAY we have registered!");
+
+            final HelpFormatter printHelp = new HelpFormatter();
+            final CommandLineParser parser = new DefaultParser();
+            final Options useOptions = App.REGISTRY.get(args[0]).options();
+
+            try {
+                final CommandLine cmd = parser.parse(useOptions, args, false);
+                if (cmd.hasOption("h")) {
+                    printHelp.printHelp("Help", useOptions);
+                    return;
+                }
+
+                System.out.print("Implement run selected tool");
+
+            } catch (final ParseException exp) {
+                printHelp.printHelp("Help", useOptions);
+                App.LOGGER.error(
+                        String.join("", "\n", exp.getMessage(), "\n")
+                );
+            }
+
         } else {
             App.LOGGER.error(
                     String.join("", "No existing report tool selected!",
