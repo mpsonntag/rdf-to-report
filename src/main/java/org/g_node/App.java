@@ -10,10 +10,8 @@
 
 package org.g_node;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
 import org.apache.log4j.Logger;
+import org.g_node.micro.commons.AppUtils;
 
 /**
  * Main application class used to parse command line input and pass
@@ -36,11 +34,20 @@ public class App {
      */
     public static void main(final String[] args) {
 
-        final String currDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
         App.LOGGER.info("\n");
-        App.LOGGER.info(String.join("", currDateTime, ", Starting logfile."));
+        App.LOGGER.info(String.join("", AppUtils.getTimeStamp("dd.MM.yyyy HH:mm"), ", Starting logfile."));
         App.LOGGER.info(String.join("", "Input arguments: '", String.join(" ", args), "'"));
 
+        if (args.length > 0) {
+            System.out.println("Implement CLI argument parsing here.");
+        } else {
+            App.LOGGER.error(
+                    String.join("", "No existing report tool selected!",
+                            "\n\t Please use syntax 'java -jar rdf-to-report.jar [reporter] [options]'",
+                            "\n\t e.g. 'java -jar rdf-to-report.jar default -i RdfFile.ttl -o outFile -f CVS'"
+                    )
+            );
+        }
     }
 
 }
