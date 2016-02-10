@@ -65,9 +65,17 @@ public class AppTest {
     }
 
     @Test
-    public void testEmptyMain() throws Exception {
+    public void testMainEmptyArgs() throws Exception {
         final String[] emptyArgs = new String[0];
         App.main(emptyArgs);
+        assertThat(this.outStream.toString()).contains("[ERROR] No existing report tool selected!");
+    }
+
+    @Test
+    public void testMainInvalidArgs() throws Exception {
+        final String[] invalidArgs = new String[1];
+        invalidArgs[0] = "iDoNotExist";
+        App.main(invalidArgs);
         assertThat(this.outStream.toString()).contains("[ERROR] No existing report tool selected!");
     }
 
