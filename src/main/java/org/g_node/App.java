@@ -23,7 +23,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 import org.g_node.micro.commons.AppUtils;
 import org.g_node.micro.commons.CliToolController;
-import org.g_node.reporter.LKTLogbook.CliLKTController;
+import org.g_node.reporter.LKTLogbook.LktCliController;
 
 /**
  * Main application class used to parse command line input and pass
@@ -43,7 +43,7 @@ public class App {
     private static final Map<String, CliToolController> REGISTRY = Collections.unmodifiableMap(
         new HashMap<String, CliToolController>() {
             {
-                put("lkt", new CliLKTController());
+                put("lkt", new LktCliController());
             }
         }
     );
@@ -71,7 +71,7 @@ public class App {
                     return;
                 }
 
-                System.out.print("Implement run selected tool");
+                App.REGISTRY.get(args[0]).run(cmd);
 
             } catch (final ParseException exp) {
                 printHelp.printHelp("Help", useOptions);

@@ -17,6 +17,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.g_node.micro.commons.CliToolController;
 import org.g_node.srv.CliOptionService;
+import org.g_node.srv.CtrlCheckService;
 
 /**
  * Class handling how to fetch reports from an RDF file specific to the LKT Logbook use case of Kay Thurley.
@@ -61,7 +62,16 @@ public class LktCliController implements CliToolController {
      * @param cmd User provided {@link CommandLine} input.
      */
     public final void run(final CommandLine cmd) {
-        System.out.println("Implement checks and actual call of reports.");
+        final String inFile = cmd.getOptionValue("i");
+        if (!CtrlCheckService.existingFile(inFile)) {
+            return;
+        }
+
+        if (!CtrlCheckService.checkValidRdfFile(inFile)) {
+            return;
+        }
+
+        System.out.println("Implement valid report check next");
     }
 
 }
