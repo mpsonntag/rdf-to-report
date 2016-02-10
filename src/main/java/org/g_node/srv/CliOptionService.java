@@ -10,8 +10,8 @@
 
 package org.g_node.srv;
 
+import java.util.List;
 import org.apache.commons.cli.Option;
-import org.g_node.micro.commons.RDFService;
 
 /**
  * Class provides CLI {@link Option}s that are common
@@ -26,7 +26,7 @@ public final class CliOptionService {
      * @param altDesc Optional description.
      * @return Help option.
      */
-    public static Option getHelpOpt(final String altDesc) {
+    public static Option getHelpOption(final String altDesc) {
 
         final String defaultDesc = "Print this message.";
         final String desc = !altDesc.isEmpty() ? altDesc : defaultDesc;
@@ -35,21 +35,61 @@ public final class CliOptionService {
     }
 
     /**
+     * Returns option necessary to parse an input file from the command line. This will always be a
+     * required option. The command line option short hand will always be "-i" and "-input-rdf".
+     * @param altDesc Alternative description replacing the default description.
+     * @return CLI option handling the parsing of the RDF input file.
+     */
+    public static Option getInFileOption(final String altDesc) {
+        final String defaultDesc = String.join("",
+                "RDF file containing the main database. ",
+                "Data for the required report will be fetched from this file.");
+        final String desc = !altDesc.isEmpty() ? altDesc : defaultDesc;
+
+        return Option.builder("i")
+                .longOpt("input-rdf")
+                .desc(desc)
+                .required()
+                .hasArg()
+                .valueSeparator()
+                .build();
+    }
+
+    /**
+     * Returns option necessary to parse the requested report from the command line. This will
+     * always be a required option. The command line option short hand will always be "-r" and "-report".
+     * @param altDesc Alternative description replacing the default description.
+     * @param reports List of reports available to the current tool.
+     * @return CLI option handling the parsing of the requested report.
+     */
+    public static Option getReportOption(final String altDesc, final List<String> reports) {
+        final String defaultDesc = String.join("",
+                "Reports available to the selected tool: ",
+                reports.toString());
+        final String desc = !altDesc.isEmpty() ? altDesc : defaultDesc;
+
+        return Option.builder("-r")
+                .longOpt("report")
+                .desc(desc)
+                .required()
+                .hasArg()
+                .valueSeparator()
+                .build();
+    }
+
+    /**
      * Returns option required to parse a given output file name from the command line.
      * Command line option shorthand will always be "-o" and "-out-file". This option is optional.
-     * If no output filename is provided, the file name of the main RDF file will be used. The former main file
-     * will be renamed to '[Date_time]_backup_[main file name]' to avoid any loss of information.
+     * Default output file name will be "[Timestamp]_out".
      * @param altDesc Alternative description replacing the default description.
-     * @return CLI option parsing an input file.
+     * @return CLI option handling the parsing of the output file.
      */
-    public static Option getOutFileOpt(final String altDesc) {
+    public static Option getOutFileOption(final String altDesc) {
 
-        final String defaultDesc = String.join(
-                "", "Optional: Path and name of the output file. ",
-                "Files with the same name will be overwritten. ",
-                "If no file name is provided, the file name of the main RDF file will be used. ",
-                "In this case, the original main RDF file will be copied to a backup file ",
-                "'[date_time]_backup_[main_file_name]', before it is overwritten.");
+        final String defaultDesc = String.join("",
+                "Optional: Path and name of the output file. ",
+                "Files with the same name will be overwritten.",
+                "\nDefault output file name will be '[Timestamp]_out'");
         final String desc = !altDesc.isEmpty() ? altDesc : defaultDesc;
 
         return  Option.builder("o")
@@ -62,16 +102,17 @@ public final class CliOptionService {
 
     /**
      * Returns option required to parse a given output format from the command line.
-     * Commandline option shorthand will always be "-f" and "-out-format".
+     * Commandline option shorthand will always be "-f" and "-out-format". This option is optional.
+     * Default output format will be "CSV".
      * @param altDesc Alternative description replacing the default description.
-     * @return CLI option parsing an input file.
+     * @param formats List of available output formats.
+     * @return CLI option handling the parsing of the output format.
      */
-    public static Option getOutFormatOpt(final String altDesc) {
+    public static Option getOutFormatOption(final String altDesc, final List<String> formats) {
 
-        final String defaultDesc = String.join(
-                "", "Optional: format of the RDF file that will be written.\n",
-                "Supported file formats: ", RDFService.RDF_FORMAT_MAP.keySet().toString(),
-                "\nDefault setting is the Turtle (TTL) format.");
+        final String defaultDesc = String.join("",
+                "Optional: Format of the report file. Default setting is the CSV format.",
+                "\nAvailable output formats: ", formats.toString());
         final String desc = !altDesc.isEmpty() ? altDesc : defaultDesc;
 
         return Option.builder("f")
@@ -81,4 +122,5 @@ public final class CliOptionService {
                 .valueSeparator()
                 .build();
     }
+
 }
