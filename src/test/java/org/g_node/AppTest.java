@@ -79,4 +79,59 @@ public class AppTest {
         assertThat(this.outStream.toString()).contains("[ERROR] No existing report tool selected!");
     }
 
+    @Test
+    public void testMainLKTMissingRequiredOptions() throws Exception {
+        final String useCase = "lkt";
+        final String missingOptMessage = "Missing required option:";
+        final String missingArgMessage = "Missing argument for option: ";
+        final String argVal = "argumentValue";
+
+        String[] missingOptionArgs = new String[1];
+        missingOptionArgs[0] = useCase;
+        App.main(missingOptionArgs);
+        assertThat(this.outStream.toString()).contains("Missing required options:");
+
+        missingOptionArgs = new String[2];
+        missingOptionArgs[0] = useCase;
+        missingOptionArgs[1] = "-i";
+        App.main(missingOptionArgs);
+        assertThat(this.outStream.toString()).contains(String.join("", missingArgMessage, "i"));
+
+        missingOptionArgs = new String[2];
+        missingOptionArgs[0] = useCase;
+        missingOptionArgs[1] = "-r";
+        App.main(missingOptionArgs);
+        assertThat(this.outStream.toString()).contains(String.join("", missingArgMessage, "r"));
+
+        missingOptionArgs = new String[3];
+        missingOptionArgs[0] = useCase;
+        missingOptionArgs[1] = "-i";
+        missingOptionArgs[2] = argVal;
+        App.main(missingOptionArgs);
+        assertThat(this.outStream.toString()).contains(missingOptMessage);
+
+        missingOptionArgs = new String[3];
+        missingOptionArgs[0] = useCase;
+        missingOptionArgs[1] = "-r";
+        missingOptionArgs[2] = argVal;
+        App.main(missingOptionArgs);
+        assertThat(this.outStream.toString()).contains(missingOptMessage);
+    }
+
+    @Test
+    public void testMainHelp() throws Exception {
+        final String useCase = "lkt";
+        final String argVal = "val";
+
+        final String[] helpArgs = new String[6];
+        helpArgs[0] = useCase;
+        helpArgs[1] = "-h";
+        helpArgs[2] = "-i";
+        helpArgs[3] = argVal;
+        helpArgs[4] = "-r";
+        helpArgs[5] = argVal;
+        App.main(helpArgs);
+        assertThat(this.outStream.toString()).contains("usage: Help");
+    }
+
 }
