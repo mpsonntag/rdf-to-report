@@ -91,14 +91,14 @@ public class LktCliControllerTest {
         final String useCase = "lkt";
         final String testFileName = "iDoNotExist";
 
-        final String[] helpArgs = new String[5];
-        helpArgs[0] = useCase;
-        helpArgs[1] = "-r";
-        helpArgs[2] = "val";
-        helpArgs[3] = "-i";
-        helpArgs[4] = testFileName;
+        final String[] cliArgs = new String[5];
+        cliArgs[0] = useCase;
+        cliArgs[1] = "-r";
+        cliArgs[2] = "val";
+        cliArgs[3] = "-i";
+        cliArgs[4] = testFileName;
 
-        App.main(helpArgs);
+        App.main(cliArgs);
         assertThat(this.outStream.toString()).contains(
                 String.join("", "File ", testFileName, " does not exist.")
         );
@@ -118,26 +118,26 @@ public class LktCliControllerTest {
 
         final String useCase = "lkt";
 
-        final String[] falseInputFileArgs = new String[5];
-        falseInputFileArgs[0] = useCase;
-        falseInputFileArgs[1] = "-r";
-        falseInputFileArgs[2] = "val";
-        falseInputFileArgs[3] = "-i";
-        falseInputFileArgs[4] = this.testFileFolder
+        final String[] cliArgs = new String[5];
+        cliArgs[0] = useCase;
+        cliArgs[1] = "-r";
+        cliArgs[2] = "val";
+        cliArgs[3] = "-i";
+        cliArgs[4] = this.testFileFolder
                 .resolve(testFileName)
                 .toAbsolutePath()
                 .normalize().toString();
 
-        App.main(falseInputFileArgs);
+        App.main(cliArgs);
         assertThat(this.outStream.toString()).contains("Failed to load file");
         assertThat(this.outStream.toString()).contains("Failed to determine the content type");
 
-        falseInputFileArgs[4] = this.testFileFolder
+        cliArgs[4] = this.testFileFolder
                 .resolve(testInvalidRDFFileName)
                 .toAbsolutePath()
                 .normalize().toString();
 
-        App.main(falseInputFileArgs);
+        App.main(cliArgs);
         assertThat(this.outStream.toString()).contains("Failed to load file");
         assertThat(this.outStream.toString()).contains("Out of place: [KEYWORD:This]");
     }
@@ -163,19 +163,57 @@ public class LktCliControllerTest {
         final String useCase = "lkt";
         final String invalidReportValue = "argumentValue";
 
-        final String[] InvalidReportArgs = new String[5];
-        InvalidReportArgs[0] = useCase;
-        InvalidReportArgs[1] = "-i";
-        InvalidReportArgs[2] = this.testFileFolder
+        final String[] cliArgs = new String[5];
+        cliArgs[0] = useCase;
+        cliArgs[1] = "-i";
+        cliArgs[2] = this.testFileFolder
                 .resolve(testRdfFileName)
                 .toAbsolutePath()
                 .normalize().toString();
-        InvalidReportArgs[3] = "-r";
-        InvalidReportArgs[4] = invalidReportValue;
+        cliArgs[3] = "-r";
+        cliArgs[4] = invalidReportValue;
 
-        App.main(InvalidReportArgs);
+        App.main(cliArgs);
         assertThat(this.outStream.toString()).contains(String.join("",
                 "'", invalidReportValue,"' is not a supported value of command line option "));
+    }
+
+    @Test
+    public void testInvalidOutputFormat() throws Exception {
+        final String testRdfFileName = "test.ttl";
+        final File currRdfFile = this.testFileFolder.resolve(testRdfFileName).toFile();
+        FileUtils.write(currRdfFile, "");
+
+        try {
+            final FileOutputStream fos = new FileOutputStream(currRdfFile);
+            try {
+                RDFDataMgr.write(fos, ModelFactory.createDefaultModel(), RDFFormat.TURTLE_PRETTY);
+                fos.close();
+            } catch (IOException ioExc) {
+                ioExc.printStackTrace();
+            }
+        } catch (FileNotFoundException exc) {
+            exc.printStackTrace();
+        }
+
+        final String useCase = "lkt";
+        final String invalidOutFormat = "invalidFormat";
+
+        final String[] cliArgs = new String[7];
+        cliArgs[0] = useCase;
+        cliArgs[1] = "-i";
+        cliArgs[2] = this.testFileFolder
+                .resolve(testRdfFileName)
+                .toAbsolutePath()
+                .normalize().toString();
+        cliArgs[3] = "-r";
+        cliArgs[4] = "default";
+        cliArgs[5] = "-f";
+        cliArgs[6] = invalidOutFormat;
+
+        App.main(cliArgs);
+        assertThat(this.outStream.toString()).contains(String.join("",
+                "Unsupported output format: '", invalidOutFormat, "'"));
     }
 
 }
