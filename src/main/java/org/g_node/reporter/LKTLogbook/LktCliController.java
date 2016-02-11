@@ -63,11 +63,11 @@ public class LktCliController implements CliToolController {
      */
     public final void run(final CommandLine cmd) {
         final String inFile = cmd.getOptionValue("i");
-        if (!CtrlCheckService.existingFile(inFile)) {
+        if (!CtrlCheckService.isExistingFile(inFile)) {
             return;
         }
 
-        if (!CtrlCheckService.checkValidRdfFile(inFile)) {
+        if (!CtrlCheckService.isValidRdfFile(inFile)) {
             return;
         }
 
