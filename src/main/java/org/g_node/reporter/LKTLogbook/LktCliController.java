@@ -26,14 +26,15 @@ import org.g_node.srv.CtrlCheckService;
  */
 public class LktCliController implements CliToolController {
     /**
+     * Reports available to the reporter tool specific for the LKT Logbook usecase.
+     */
+    private final List<String> reports = Collections.singletonList("DEFAULT");
+    /**
      * Method returning the commandline options of the LKT reporter tool.
      *
      * @return Available {@link CommandLine} {@link Options}.
      */
     public final Options options() {
-
-        // TODO implement available reports
-        final List<String> reports = Collections.singletonList("default");
 
         // TODO implement available output formats
         final List<String> formats = Collections.singletonList("CSV");
@@ -42,7 +43,7 @@ public class LktCliController implements CliToolController {
 
         final Option opHelp = CliOptionService.getHelpOption("");
         final Option opInRdfFile = CliOptionService.getInFileOption("");
-        final Option opReport = CliOptionService.getReportOption("", reports);
+        final Option opReport = CliOptionService.getReportOption("", this.reports);
         final Option opOutFile = CliOptionService.getOutFileOption("");
         final Option opOutFormat = CliOptionService.getOutFormatOption("", formats);
 
@@ -68,6 +69,10 @@ public class LktCliController implements CliToolController {
         }
 
         if (!CtrlCheckService.isValidRdfFile(inFile)) {
+            return;
+        }
+
+        if (!CtrlCheckService.isSupportedCliArgValue(cmd.getOptionValue("r"), this.reports, "-r/-report")) {
             return;
         }
 
