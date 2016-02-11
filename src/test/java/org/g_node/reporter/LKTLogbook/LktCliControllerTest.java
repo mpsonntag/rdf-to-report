@@ -12,6 +12,9 @@ package org.g_node.reporter.LKTLogbook;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,7 +22,11 @@ import java.nio.file.Paths;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
 import org.apache.commons.io.FileUtils;
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFFormat;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -133,6 +140,42 @@ public class LktCliControllerTest {
         App.main(falseInputFileArgs);
         assertThat(this.outStream.toString()).contains("Failed to load file");
         assertThat(this.outStream.toString()).contains("Out of place: [KEYWORD:This]");
+    }
+
+    @Test
+    public void testInvalidReport() throws Exception {
+        final String testRdfFileName = "test.ttl";
+        final File currRdfFile = this.testFileFolder.resolve(testRdfFileName).toFile();
+        FileUtils.write(currRdfFile, "");
+
+        try {
+            final FileOutputStream fos = new FileOutputStream(currRdfFile);
+            try {
+                RDFDataMgr.write(fos, ModelFactory.createDefaultModel(), RDFFormat.TURTLE_PRETTY);
+                fos.close();
+            } catch (IOException ioExc) {
+                ioExc.printStackTrace();
+            }
+        } catch (FileNotFoundException exc) {
+            exc.printStackTrace();
+        }
+
+        final String useCase = "lkt";
+        final String invalidReportValue = "argumentValue";
+
+        final String[] InvalidReportArgs = new String[5];
+        InvalidReportArgs[0] = useCase;
+        InvalidReportArgs[1] = "-i";
+        InvalidReportArgs[2] = this.testFileFolder
+                .resolve(testRdfFileName)
+                .toAbsolutePath()
+                .normalize().toString();
+        InvalidReportArgs[3] = "-r";
+        InvalidReportArgs[4] = invalidReportValue;
+
+        App.main(InvalidReportArgs);
+        assertThat(this.outStream.toString()).contains(String.join("",
+                "'", invalidReportValue,"' is not a supported value of command line option "));
     }
 
 }
