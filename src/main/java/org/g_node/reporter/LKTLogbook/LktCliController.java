@@ -10,6 +10,12 @@
 
 package org.g_node.reporter.LKTLogbook;
 
+import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.QueryExecution;
+import com.hp.hpl.jena.query.QueryExecutionFactory;
+import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.rdf.model.Model;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -17,6 +23,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.g_node.micro.commons.CliToolController;
+import org.g_node.micro.commons.RDFService;
 import org.g_node.srv.CliOptionService;
 import org.g_node.srv.CtrlCheckService;
 
@@ -66,6 +73,37 @@ public class LktCliController implements CliToolController {
      * @param cmd User provided {@link CommandLine} input.
      */
     public final void run(final CommandLine cmd) {
+
+        final String prototypeQuery = String.join("",
+                "prefix lkt:   <https://orcid.org/0000-0003-4857-1083#>",
+                "prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>",
+                "prefix gn:    <https://github.com/G-Node/neuro-ontology/>",
+                "prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#>",
+                "prefix xs:    <http://www.w3.org/2001/XMLSchema#>",
+                "prefix foaf:  <http://xmlns.com/foaf/0.1/>",
+                "prefix dc:    <http://purl.org/dc/terms/>",
+                "SELECT ?node ?dateTime ?name ?cm ?feed ?x ?source",
+                "WHERE",
+                "{",
+                    "{",
+                        "?node a gn:SubjectLogEntry ;",
+                        "gn:hasInitialWeightDate false ;",
+                        "gn:hasProvenance ?prov ;",
+                        "gn:hasExperimenter ?expm ;",
+                        "gn:hasWeight ?anonNode .",
+                    "}",
+                    "OPTIONAL {",
+                    "?node rdfs:comment ?cm ;",
+                    "gn:hasFeed ?feed ;",
+                    "gn:startedAt ?dateTime.",
+                "}",
+                    "?anonNode ?pred ?x .",
+                        "?prov dc:source ?source .",
+                        "?expm foaf:name ?name . FILTER (?name != \"Magdalena Kautzky\"^^xs:string)",
+                "}",
+                "ORDER BY ?cm"
+        );
+
         final String inFile = cmd.getOptionValue("i");
         if (!CtrlCheckService.isExistingFile(inFile)) {
             return;
@@ -84,7 +122,20 @@ public class LktCliController implements CliToolController {
             return;
         }
 
-        System.out.println("\n\tImplement reading of RDF file next");
+        final Model queryModel = RDFService.openModelFromFile(inFile);
+
+        final Query query = QueryFactory.create(prototypeQuery);
+
+        System.out.println("[DEBUG] Start query...");
+
+        try (QueryExecution qexec = QueryExecutionFactory.create(query, queryModel)) {
+            final ResultSet result = qexec.execSelect();
+
+            System.out.println(String.join("", "[DEBUG] query has results: ", Boolean.toString(result.hasNext())));
+
+            result.forEachRemaining(c -> System.out.println(c.toString()));
+        }
+
     }
 
 }
