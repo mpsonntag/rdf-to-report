@@ -12,6 +12,7 @@ package org.g_node.reporter.LKTLogbook;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
@@ -26,9 +27,14 @@ import org.g_node.srv.CtrlCheckService;
  */
 public class LktCliController implements CliToolController {
     /**
-     * Reports available to the reporter tool specific for the LKT Logbook usecase.
+     * Reports available to the reporter tool specific for the LKT Logbook usecase. Entries should always be upper case.
      */
     private final List<String> reports = Collections.singletonList("DEFAULT");
+    /**
+     * Output formats available to the reporter tool. Entries should always be upper case.
+     */
+    //TODO this should be moved to a class where it can be accessed from other reporter tools as well.
+    private final Set<String> outputFormats = Collections.singleton("CSV");
     /**
      * Method returning the commandline options of the LKT reporter tool.
      *
@@ -36,16 +42,13 @@ public class LktCliController implements CliToolController {
      */
     public final Options options() {
 
-        // TODO implement available output formats
-        final List<String> formats = Collections.singletonList("CSV");
-
         final Options options = new Options();
 
         final Option opHelp = CliOptionService.getHelpOption("");
         final Option opInRdfFile = CliOptionService.getInFileOption("");
         final Option opReport = CliOptionService.getReportOption("", this.reports);
         final Option opOutFile = CliOptionService.getOutFileOption("");
-        final Option opOutFormat = CliOptionService.getOutFormatOption("", formats);
+        final Option opOutFormat = CliOptionService.getOutFormatOption("", this.outputFormats);
 
         options.addOption(opHelp);
         options.addOption(opInRdfFile);
@@ -76,7 +79,12 @@ public class LktCliController implements CliToolController {
             return;
         }
 
-        System.out.println("Implement valid report check next");
+        final String outputFormat = cmd.getOptionValue("f", "CSV");
+        if (!CtrlCheckService.isSupportedOutputFormat(outputFormat, this.outputFormats)) {
+            return;
+        }
+
+        System.out.println("\n\tImplement reading of RDF file next");
     }
 
 }

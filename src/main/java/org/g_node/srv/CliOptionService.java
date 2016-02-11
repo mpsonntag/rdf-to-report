@@ -11,6 +11,7 @@
 package org.g_node.srv;
 
 import java.util.List;
+import java.util.Set;
 import org.apache.commons.cli.Option;
 
 /**
@@ -105,10 +106,10 @@ public final class CliOptionService {
      * Commandline option shorthand will always be "-f" and "-out-format". This option is optional.
      * Default output format will be "CSV".
      * @param altDesc Alternative description replacing the default description.
-     * @param formats List of available output formats.
+     * @param formats Set of available output formats.
      * @return CLI option handling the parsing of the output format.
      */
-    public static Option getOutFormatOption(final String altDesc, final List<String> formats) {
+    public static Option getOutFormatOption(final String altDesc, final Set<String> formats) {
 
         final String defaultDesc = String.join("",
                 "Optional: Format of the report file. Default setting is the CSV format.",
