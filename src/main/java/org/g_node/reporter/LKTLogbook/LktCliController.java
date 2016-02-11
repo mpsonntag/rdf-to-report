@@ -15,7 +15,12 @@ import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.query.ResultSetFormatter;
 import com.hp.hpl.jena.rdf.model.Model;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -82,7 +87,7 @@ public class LktCliController implements CliToolController {
                 "prefix xs:    <http://www.w3.org/2001/XMLSchema#>",
                 "prefix foaf:  <http://xmlns.com/foaf/0.1/>",
                 "prefix dc:    <http://purl.org/dc/terms/>",
-                "SELECT ?node ?dateTime ?name ?cm ?feed ?x ?source",
+                "SELECT ?node ?dateTime ?name ?cm ?feed ?x ?source ",
                 "WHERE",
                 "{",
                     "{",
@@ -133,7 +138,25 @@ public class LktCliController implements CliToolController {
 
             System.out.println(String.join("", "[DEBUG] query has results: ", Boolean.toString(result.hasNext())));
 
-            result.forEachRemaining(c -> System.out.println(c.toString()));
+            //ResultSetFormatter.outputAsCSV(result);
+
+            try {
+                final File file = new File("/home/msonntag/work/tmp/out.csv");
+
+                if (!file.exists()) {
+                    file.createNewFile();
+                }
+
+                final FileOutputStream fop = new FileOutputStream(file);
+
+                ResultSetFormatter.outputAsCSV(fop, result);
+                fop.flush();
+                fop.close();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
         }
 
     }
