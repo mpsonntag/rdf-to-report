@@ -17,7 +17,6 @@ import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetFormatter;
 import com.hp.hpl.jena.rdf.model.Model;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -41,7 +40,7 @@ public class LktCliController implements CliToolController {
     /**
      * Reports available to the reporter tool specific for the LKT Logbook usecase. Entries should always be upper case.
      */
-    private final List<String> reports = Collections.singletonList("DEFAULT");
+    private final List<String> reports = Collections.singletonList("EXPERIMENTS");
     /**
      * Output formats available to the reporter tool. Entries should always be upper case.
      */
@@ -87,27 +86,35 @@ public class LktCliController implements CliToolController {
                 "prefix xs:    <http://www.w3.org/2001/XMLSchema#>",
                 "prefix foaf:  <http://xmlns.com/foaf/0.1/>",
                 "prefix dc:    <http://purl.org/dc/terms/>",
-                "SELECT ?node ?dateTime ?name ?cm ?feed ?x ?source ",
-                "WHERE",
+                "SELECT ?Project ?Experiment ?ExperimentDate ?Paradigm ?ParadigmSpecifics ",
+                "?Experimenter ?ExperimentComment ?SubjectId ?BirthDate ?Sex ?WithdrawalDate ",
+                "?PermitNumber ?ExperimentId ",
+                " WHERE {",
                 "{",
-                    "{",
-                        "?node a gn:SubjectLogEntry ;",
-                        "gn:hasInitialWeightDate false ;",
-                        "gn:hasProvenance ?prov ;",
-                        "gn:hasExperimenter ?expm ;",
-                        "gn:hasWeight ?anonNode .",
-                    "}",
-                    "OPTIONAL {",
-                    "?node rdfs:comment ?cm ;",
-                    "gn:hasFeed ?feed ;",
-                    "gn:startedAt ?dateTime.",
+                    "?node a gn:Project ;",
+                    "rdfs:label ?Project ;",
+                    "gn:hasExperiment ?ExperimentId ;",
+                    "gn:hasProvenance ?ProvenanceId .",
                 "}",
-                    "?anonNode ?pred ?x .",
-                        "?prov dc:source ?source .",
-                        "?expm foaf:name ?name . FILTER (?name != \"Magdalena Kautzky\"^^xs:string)",
+                " OPTIONAL {",
+                    "?ExperimentId rdfs:comment ?ExperimentComment .",
+                    "?ExperimentId gn:hasParadigmSpecifics ?ParadigmSpecifics .",
                 "}",
-                "ORDER BY ?cm"
-        );
+                "?ExperimentId rdfs:label ?Experiment .",
+                "?ExperimentId gn:startedAt ?ExperimentDate .",
+                "?ExperimentId gn:hasParadigm ?Paradigm .",
+                "?ExperimentId gn:hasSubject ?Subject .",
+                "?ExperimentId gn:hasExperimenter ?ExperimenterId .",
+                "?ExperimenterId foaf:name ?Experimenter .",
+                "?Subject gn:hasSubjectID ?SubjectId .",
+                "?Subject gn:hasPermit ?PermitId .",
+                "?Subject gn:hasBirthDate ?BirthDate .",
+                "?Subject gn:hasSex ?Sex .",
+                "?Subject gn:hasWithdrawalDate ?WithdrawalDate .",
+                "?PermitId gn:hasNumber ?PermitNumber .",
+                "}",
+                " ORDER BY ?Project ?SubjectId ?ExperimentDate"
+                );
 
         final String inFile = cmd.getOptionValue("i");
         if (!CtrlCheckService.isExistingFile(inFile)) {
@@ -138,8 +145,6 @@ public class LktCliController implements CliToolController {
 
             System.out.println(String.join("", "[DEBUG] query has results: ", Boolean.toString(result.hasNext())));
 
-            //ResultSetFormatter.outputAsCSV(result);
-
             try {
                 final File file = new File("/home/msonntag/work/tmp/out.csv");
 
@@ -156,9 +161,7 @@ public class LktCliController implements CliToolController {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
         }
-
     }
 
 }
