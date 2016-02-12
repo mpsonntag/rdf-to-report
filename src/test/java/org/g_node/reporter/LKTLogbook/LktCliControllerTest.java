@@ -207,7 +207,8 @@ public class LktCliControllerTest {
                 .toAbsolutePath()
                 .normalize().toString();
         cliArgs[3] = "-r";
-        cliArgs[4] = "default";
+        // TODO access actual existing reports from the lkt usecase
+        cliArgs[4] = "experiments";
         cliArgs[5] = "-f";
         cliArgs[6] = invalidOutFormat;
 
