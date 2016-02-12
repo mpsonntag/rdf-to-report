@@ -143,10 +143,11 @@ public class LktCliController implements CliToolController {
         try (QueryExecution qexec = QueryExecutionFactory.create(query, queryModel)) {
             final ResultSet result = qexec.execSelect();
 
-            System.out.println(String.join("", "[DEBUG] query has results: ", Boolean.toString(result.hasNext())));
+            final String defaultOutputFile = "out.csv";
+            final String outFile = cmd.getOptionValue("o", defaultOutputFile);
 
             try {
-                final File file = new File("/home/msonntag/work/tmp/out.csv");
+                final File file = new File(outFile);
 
                 if (!file.exists()) {
                     file.createNewFile();
