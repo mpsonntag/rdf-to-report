@@ -26,6 +26,7 @@ import java.util.Set;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.apache.log4j.Logger;
 import org.g_node.micro.commons.CliToolController;
 import org.g_node.micro.commons.RDFService;
 import org.g_node.srv.CliOptionService;
@@ -37,6 +38,10 @@ import org.g_node.srv.CtrlCheckService;
  * @author Michael Sonntag (sonntag@bio.lmu.de)
  */
 public class LktCliController implements CliToolController {
+    /**
+     * Access to the main LOGGER.
+     */
+    private static final Logger LOGGER = Logger.getLogger(LktCliController.class.getName());
     /**
      * Reports available to the reporter tool specific for the LKT Logbook usecase. Entries should always be upper case.
      */
@@ -138,7 +143,7 @@ public class LktCliController implements CliToolController {
 
         final Query query = QueryFactory.create(prototypeQuery);
 
-        System.out.println("[DEBUG] Start query...");
+        LktCliController.LOGGER.info("Start query...");
 
         try (QueryExecution qexec = QueryExecutionFactory.create(query, queryModel)) {
             final ResultSet result = qexec.execSelect();
@@ -147,6 +152,8 @@ public class LktCliController implements CliToolController {
             final String outFile = cmd.getOptionValue("o", defaultOutputFile);
 
             try {
+                LktCliController.LOGGER.info(String.join("", "Write query to file...\t\t(", outFile, ")"));
+
                 final File file = new File(outFile);
 
                 if (!file.exists()) {
