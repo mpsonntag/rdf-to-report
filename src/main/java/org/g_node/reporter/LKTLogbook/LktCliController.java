@@ -20,6 +20,9 @@ import com.hp.hpl.jena.rdf.model.Model;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -27,6 +30,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.log4j.Logger;
+import org.g_node.micro.commons.AppUtils;
 import org.g_node.micro.commons.CliToolController;
 import org.g_node.micro.commons.RDFService;
 import org.g_node.srv.CliOptionService;
@@ -148,7 +152,7 @@ public class LktCliController implements CliToolController {
         try (QueryExecution qexec = QueryExecutionFactory.create(query, queryModel)) {
             final ResultSet result = qexec.execSelect();
 
-            final String defaultOutputFile = "out.csv";
+            final String defaultOutputFile = String.join("", AppUtils.getTimeStamp("yyyyMMddHHmm"), "_out.csv");
             final String outFile = cmd.getOptionValue("o", defaultOutputFile);
 
             try {
