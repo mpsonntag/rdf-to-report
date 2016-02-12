@@ -47,7 +47,7 @@ public final class AppUtilsTest {
     }
 
     /**
-     * Method checks that the method returns a valid timestamp.
+     * Method checks via regular expression that the method returns a valid timestamp.
      */
     @Test
     public void testGetTimeStamp() {
