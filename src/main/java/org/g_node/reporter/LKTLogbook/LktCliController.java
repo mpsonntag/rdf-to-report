@@ -20,9 +20,6 @@ import com.hp.hpl.jena.rdf.model.Model;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -152,27 +149,37 @@ public class LktCliController implements CliToolController {
         try (QueryExecution qexec = QueryExecutionFactory.create(query, queryModel)) {
             final ResultSet result = qexec.execSelect();
 
-            final String defaultOutputFile = String.join("", AppUtils.getTimeStamp("yyyyMMddHHmm"), "_out.csv");
-            final String outFile = cmd.getOptionValue("o", defaultOutputFile);
+            this.saveResultsToCsv(result, cmd);
+        }
+    }
 
-            try {
-                LktCliController.LOGGER.info(String.join("", "Write query to file...\t\t(", outFile, ")"));
+    /**
+     * Prototype method saving an RDF result set to a CSV file.
+     * @param result RDF result set that will be saved to a CSV file.
+     * @param cmd User provided {@link CommandLine} input.
+     */
 
-                final File file = new File(outFile);
+    private void saveResultsToCsv(final ResultSet result, final CommandLine cmd) {
+        final String defaultOutputFile = String.join("", AppUtils.getTimeStamp("yyyyMMddHHmm"), "_out.csv");
+        final String outFile = cmd.getOptionValue("o", defaultOutputFile);
 
-                if (!file.exists()) {
-                    file.createNewFile();
-                }
+        try {
+            LktCliController.LOGGER.info(String.join("", "Write query to file...\t\t(", outFile, ")"));
 
-                final FileOutputStream fop = new FileOutputStream(file);
+            final File file = new File(outFile);
 
-                ResultSetFormatter.outputAsCSV(fop, result);
-                fop.flush();
-                fop.close();
-
-            } catch (IOException e) {
-                e.printStackTrace();
+            if (!file.exists()) {
+                file.createNewFile();
             }
+
+            final FileOutputStream fop = new FileOutputStream(file);
+
+            ResultSetFormatter.outputAsCSV(fop, result);
+            fop.flush();
+            fop.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
