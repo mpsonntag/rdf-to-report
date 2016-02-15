@@ -10,20 +10,17 @@
 
 package org.g_node.reporter.LKTLogbook;
 
+import com.hp.hpl.jena.rdf.model.ModelFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
 import org.apache.commons.io.FileUtils;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
@@ -31,10 +28,9 @@ import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
+import static org.assertj.core.api.Assertions.assertThat;
 import org.g_node.App;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 /**
  * Unit tests for the LktCliController class. Output and Error streams are redirected
@@ -58,7 +54,6 @@ public class LktCliControllerTest {
      */
     @Before
     public void setUp() throws Exception {
-
         this.stdout = System.out;
         this.outStream = new ByteArrayOutputStream();
         System.setOut(new PrintStream(this.outStream));
@@ -70,7 +65,6 @@ public class LktCliControllerTest {
                         new PatternLayout("[%-5p] %m%n")
                 )
         );
-
     }
 
     /**
@@ -107,12 +101,12 @@ public class LktCliControllerTest {
     @Test
     public void testRunFalseInputFile() throws Exception {
 
-        final String testFileName = "test.txt";
-        final String testInvalidRDFFileName = "test.ttl";
+        // Apache Jena does not properly close files that are not
+        // RDF files by file ending e.g. ".txt" files. Trying to delete such
+        // a file will lead to an error. For this reason an existing txt file is used.
+        final URL testFileName = this.getClass().getResource("/testOpenInvalidRDF.txt");
 
-        final File currTextFile = this.testFileFolder.resolve(testFileName).toFile();
-        FileUtils.write(currTextFile, "This is a normal text file");
-
+        final String testInvalidRDFFileName = "testFalseInFile.ttl";
         final File currInvalidRdfFile = this.testFileFolder.resolve(testInvalidRDFFileName).toFile();
         FileUtils.write(currInvalidRdfFile, "This is an invalid rdf file");
 
@@ -123,10 +117,7 @@ public class LktCliControllerTest {
         cliArgs[1] = "-r";
         cliArgs[2] = "val";
         cliArgs[3] = "-i";
-        cliArgs[4] = this.testFileFolder
-                .resolve(testFileName)
-                .toAbsolutePath()
-                .normalize().toString();
+        cliArgs[4] = Paths.get(testFileName.toURI()).toFile().toString();
 
         App.main(cliArgs);
         assertThat(this.outStream.toString()).contains("Failed to load file");
@@ -144,7 +135,7 @@ public class LktCliControllerTest {
 
     @Test
     public void testInvalidReport() throws Exception {
-        final String testRdfFileName = "test.ttl";
+        final String testRdfFileName = "testInvalidReport.ttl";
         final File currRdfFile = this.testFileFolder.resolve(testRdfFileName).toFile();
         FileUtils.write(currRdfFile, "");
 
@@ -180,7 +171,7 @@ public class LktCliControllerTest {
 
     @Test
     public void testInvalidOutputFormat() throws Exception {
-        final String testRdfFileName = "test.ttl";
+        final String testRdfFileName = "testInvalidOutputFormat.ttl";
         final File currRdfFile = this.testFileFolder.resolve(testRdfFileName).toFile();
         FileUtils.write(currRdfFile, "");
 
