@@ -1,0 +1,1 @@
+Required to test the loading of non-RDF files with the Apache Jena RDFDataMgr.loadModel().
