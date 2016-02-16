@@ -29,6 +29,7 @@ import org.apache.commons.cli.Options;
 import org.apache.log4j.Logger;
 import org.g_node.micro.commons.AppUtils;
 import org.g_node.micro.commons.CliToolController;
+import org.g_node.micro.commons.FileService;
 import org.g_node.micro.commons.RDFService;
 import org.g_node.srv.CliOptionService;
 import org.g_node.srv.CtrlCheckService;
@@ -161,7 +162,11 @@ public class LktCliController implements CliToolController {
 
     private void saveResultsToCsv(final ResultSet result, final CommandLine cmd) {
         final String defaultOutputFile = String.join("", AppUtils.getTimeStamp("yyyyMMddHHmm"), "_out.csv");
-        final String outFile = cmd.getOptionValue("o", defaultOutputFile);
+        String outFile = cmd.getOptionValue("o", defaultOutputFile);
+
+        if (!FileService.checkFileExtension(outFile, "CSV")) {
+            outFile = String.join("", outFile, ".csv");
+        }
 
         try {
             LktCliController.LOGGER.info(String.join("", "Write query to file...\t\t(", outFile, ")"));
