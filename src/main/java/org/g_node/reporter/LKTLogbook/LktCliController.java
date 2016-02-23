@@ -21,7 +21,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
@@ -45,14 +47,64 @@ public class LktCliController implements CliToolController {
      */
     private static final Logger LOGGER = Logger.getLogger(LktCliController.class.getName());
     /**
-     * Reports available to the reporter tool specific for the LKT Logbook usecase. Entries should always be upper case.
+     * Reports available to the reporter tool specific for the LKT Logbook use case.
      */
-    private final List<String> reports = Collections.singletonList("EXPERIMENTS");
+    private Map<String, String> reports;
     /**
      * Output formats available to the reporter tool. Entries should always be upper case.
      */
     //TODO this should be moved to a class where it can be accessed from other reporter tools as well.
     private final Set<String> outputFormats = Collections.singleton("CSV");
+
+    /**
+     * Constructor populates the Map of queries available to this reporter.
+     * Entries have to be be upper case.
+     */
+    public LktCliController() {
+
+        final String experimentsQuery = String.join("",
+                "prefix lkt:   <https://orcid.org/0000-0003-4857-1083#>",
+                "prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>",
+                "prefix gn:    <https://github.com/G-Node/neuro-ontology/>",
+                "prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#>",
+                "prefix xs:    <http://www.w3.org/2001/XMLSchema#>",
+                "prefix foaf:  <http://xmlns.com/foaf/0.1/>",
+                "prefix dc:    <http://purl.org/dc/terms/>",
+                "SELECT ?Project ?Experiment ?ExperimentDate ?Paradigm ?ParadigmSpecifics ",
+                "?Experimenter ?ExperimentComment ?SubjectId ?BirthDate ?Sex ?WithdrawalDate ",
+                "?PermitNumber ?ExperimentId ",
+                " WHERE {",
+                "{",
+                "?node a gn:Project ;",
+                "rdfs:label ?Project ;",
+                "gn:hasExperiment ?ExperimentId ;",
+                "gn:hasProvenance ?ProvenanceId .",
+                "}",
+                " OPTIONAL {",
+                "?ExperimentId rdfs:comment ?ExperimentComment .",
+                "?ExperimentId gn:hasParadigm ?Paradigm .",
+                "?ExperimentId gn:hasParadigmSpecifics ?ParadigmSpecifics .",
+                "}",
+                "?ExperimentId rdfs:label ?Experiment .",
+                "?ExperimentId gn:startedAt ?ExperimentDate .",
+                "?ExperimentId gn:hasSubject ?Subject .",
+                "?ExperimentId gn:hasExperimenter ?ExperimenterId .",
+                "?ExperimenterId foaf:name ?Experimenter .",
+                "?Subject gn:hasSubjectID ?SubjectId .",
+                "?Subject gn:hasPermit ?PermitId .",
+                "?Subject gn:hasBirthDate ?BirthDate .",
+                "?Subject gn:hasSex ?Sex .",
+                "?Subject gn:hasWithdrawalDate ?WithdrawalDate .",
+                "?PermitId gn:hasNumber ?PermitNumber .",
+                "}",
+                " ORDER BY ?Project ?SubjectId ?ExperimentDate"
+        );
+
+        this.reports = new HashMap<String, String>() { {
+                put("EXPERIMENTS", experimentsQuery);
+            } };
+    }
+
     /**
      * Method returning the commandline options of the LKT reporter tool.
      *
@@ -64,7 +116,7 @@ public class LktCliController implements CliToolController {
 
         final Option opHelp = CliOptionService.getHelpOption("");
         final Option opInRdfFile = CliOptionService.getInFileOption("");
-        final Option opReport = CliOptionService.getReportOption("", this.reports);
+        final Option opReport = CliOptionService.getReportOption("", this.reports.keySet());
         final Option opOutFile = CliOptionService.getOutFileOption("");
         final Option opOutFormat = CliOptionService.getOutFormatOption("", this.outputFormats);
 
@@ -85,44 +137,6 @@ public class LktCliController implements CliToolController {
      */
     public final void run(final CommandLine cmd) {
 
-        final String prototypeQuery = String.join("",
-                "prefix lkt:   <https://orcid.org/0000-0003-4857-1083#>",
-                "prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>",
-                "prefix gn:    <https://github.com/G-Node/neuro-ontology/>",
-                "prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#>",
-                "prefix xs:    <http://www.w3.org/2001/XMLSchema#>",
-                "prefix foaf:  <http://xmlns.com/foaf/0.1/>",
-                "prefix dc:    <http://purl.org/dc/terms/>",
-                "SELECT ?Project ?Experiment ?ExperimentDate ?Paradigm ?ParadigmSpecifics ",
-                "?Experimenter ?ExperimentComment ?SubjectId ?BirthDate ?Sex ?WithdrawalDate ",
-                "?PermitNumber ?ExperimentId ",
-                " WHERE {",
-                "{",
-                    "?node a gn:Project ;",
-                    "rdfs:label ?Project ;",
-                    "gn:hasExperiment ?ExperimentId ;",
-                    "gn:hasProvenance ?ProvenanceId .",
-                "}",
-                " OPTIONAL {",
-                    "?ExperimentId rdfs:comment ?ExperimentComment .",
-                    "?ExperimentId gn:hasParadigm ?Paradigm .",
-                    "?ExperimentId gn:hasParadigmSpecifics ?ParadigmSpecifics .",
-                "}",
-                "?ExperimentId rdfs:label ?Experiment .",
-                "?ExperimentId gn:startedAt ?ExperimentDate .",
-                "?ExperimentId gn:hasSubject ?Subject .",
-                "?ExperimentId gn:hasExperimenter ?ExperimenterId .",
-                "?ExperimenterId foaf:name ?Experimenter .",
-                "?Subject gn:hasSubjectID ?SubjectId .",
-                "?Subject gn:hasPermit ?PermitId .",
-                "?Subject gn:hasBirthDate ?BirthDate .",
-                "?Subject gn:hasSex ?Sex .",
-                "?Subject gn:hasWithdrawalDate ?WithdrawalDate .",
-                "?PermitId gn:hasNumber ?PermitNumber .",
-                "}",
-                " ORDER BY ?Project ?SubjectId ?ExperimentDate"
-                );
-
         final String inFile = cmd.getOptionValue("i");
         if (!CtrlCheckService.isExistingFile(inFile)) {
             return;
@@ -132,7 +146,7 @@ public class LktCliController implements CliToolController {
             return;
         }
 
-        if (!CtrlCheckService.isSupportedCliArgValue(cmd.getOptionValue("r"), this.reports, "-r/-report")) {
+        if (!CtrlCheckService.isSupportedCliArgValue(cmd.getOptionValue("r"), this.reports.keySet(), "-r/-report")) {
             return;
         }
 
@@ -143,7 +157,9 @@ public class LktCliController implements CliToolController {
 
         final Model queryModel = RDFService.openModelFromFile(inFile);
 
-        final Query query = QueryFactory.create(prototypeQuery);
+        final String queryString = this.reports.get(cmd.getOptionValue("r").toUpperCase(Locale.ENGLISH));
+
+        final Query query = QueryFactory.create(queryString);
 
         LktCliController.LOGGER.info("Start query...");
 
@@ -159,7 +175,6 @@ public class LktCliController implements CliToolController {
      * @param result RDF result set that will be saved to a CSV file.
      * @param cmd User provided {@link CommandLine} input.
      */
-
     private void saveResultsToCsv(final ResultSet result, final CommandLine cmd) {
         final String defaultOutputFile = String.join("", AppUtils.getTimeStamp("yyyyMMddHHmm"), "_out.csv");
         String outFile = cmd.getOptionValue("o", defaultOutputFile);
