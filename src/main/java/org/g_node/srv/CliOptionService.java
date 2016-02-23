@@ -10,7 +10,6 @@
 
 package org.g_node.srv;
 
-import java.util.List;
 import java.util.Set;
 import org.apache.commons.cli.Option;
 
@@ -63,7 +62,7 @@ public final class CliOptionService {
      * @param reports List of reports available to the current tool.
      * @return CLI option handling the parsing of the requested report.
      */
-    public static Option getReportOption(final String altDesc, final List<String> reports) {
+    public static Option getReportOption(final String altDesc, final Set<String> reports) {
         final String defaultDesc = String.join("",
                 "Reports available to the selected tool: ",
                 reports.toString());
