@@ -62,14 +62,20 @@ public class LktCliController implements CliToolController {
      */
     public LktCliController() {
 
-        final String experimentsQuery = String.join("",
+        // TODO add custom cli option, load SPARQL from file and use instead of prepared report.
+
+        final String queryPrefixes = String.join("",
                 "prefix lkt:   <https://orcid.org/0000-0003-4857-1083#>",
                 "prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>",
                 "prefix gn:    <https://github.com/G-Node/neuro-ontology/>",
                 "prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#>",
                 "prefix xs:    <http://www.w3.org/2001/XMLSchema#>",
                 "prefix foaf:  <http://xmlns.com/foaf/0.1/>",
-                "prefix dc:    <http://purl.org/dc/terms/>",
+                "prefix dc:    <http://purl.org/dc/terms/>"
+                );
+
+        final String experimentsQuery = String.join("",
+                queryPrefixes,
                 "SELECT ?Project ?Experiment ?ExperimentDate ?Paradigm ?ParadigmSpecifics ",
                 "?Experimenter ?ExperimentComment ?SubjectId ?BirthDate ?Sex ?WithdrawalDate ",
                 "?PermitNumber ?ExperimentId ",
@@ -100,8 +106,39 @@ public class LktCliController implements CliToolController {
                 " ORDER BY ?Project ?SubjectId ?ExperimentDate"
         );
 
+        final String subjectsQuery = String.join("",
+                queryPrefixes,
+                "SELECT ?SubjectID ?PermitNumber ?SpeciesName ?ScientificName ?Sex ?BirthDate ?WithdrawalDate ",
+                "(MIN(?EntryDate) AS ?FirstEntry) ?Experimenter ?Comment ",
+                " WHERE ",
+                "{",
+                "{",
+                "?node a gn:Subject ;",
+                "gn:hasSubjectID ?SubjectID ;",
+                "gn:hasSpeciesName ?SpeciesName ;",
+                "gn:hasScientificName ?ScientificName ;",
+                "gn:hasSex ?Sex ;",
+                "gn:hasBirthDate ?BirthDate ;",
+                "gn:hasWithdrawalDate ?WithdrawalDate ;",
+                "gn:hasPermit ?PermitID .",
+                "}",
+                "?PermitID gn:hasNumber ?PermitNumber .",
+                " OPTIONAL {",
+                "?node gn:hasSubjectLogEntry ?SubjectEntryID .",
+                "?SubjectEntryID gn:startedAt ?EntryDate .",
+                "?SubjectEntryID gn:hasExperimenter ?ExperimenterID .",
+                "?ExperimenterID foaf:name ?Experimenter .",
+                "?SubjectEntryID rdfs:comment ?Comment .",
+                "}",
+                "}",
+                " GROUP BY ?SubjectID ?PermitNumber ?SpeciesName ?ScientificName ?Sex ?BirthDate ?WithdrawalDate ",
+                "?FirstEntry ?Experimenter ?Comment",
+                " ORDER BY ?SubjectID ?EntryDate"
+        );
+
         this.reports = new HashMap<String, String>() { {
                 put("EXPERIMENTS", experimentsQuery);
+                put("SUBJECTS", subjectsQuery);
             } };
     }
 
