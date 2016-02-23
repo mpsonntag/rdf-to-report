@@ -99,7 +99,7 @@ public final class CtrlCheckService {
      * @return True if the input value is contained within the list, false if not.
      */
     public static boolean isSupportedCliArgValue(final String cliArgValue,
-                                                 final List<String> argValList,
+                                                 final Set<String> argValList,
                                                  final String cliArgDesc) {
         CtrlCheckService.LOGGER.info(String.join("", "Checking value of command line option '", cliArgDesc, "'..."));
         if (!argValList.contains(cliArgValue.toUpperCase(Locale.ENGLISH))) {
