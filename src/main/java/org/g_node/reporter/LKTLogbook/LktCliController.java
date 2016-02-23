@@ -15,11 +15,7 @@ import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.query.ResultSetFormatter;
 import com.hp.hpl.jena.rdf.model.Model;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
@@ -31,7 +27,6 @@ import org.apache.commons.cli.Options;
 import org.apache.log4j.Logger;
 import org.g_node.micro.commons.AppUtils;
 import org.g_node.micro.commons.CliToolController;
-import org.g_node.micro.commons.FileService;
 import org.g_node.micro.commons.RDFService;
 import org.g_node.srv.CliOptionService;
 import org.g_node.srv.CtrlCheckService;
@@ -203,40 +198,9 @@ public class LktCliController implements CliToolController {
         try (QueryExecution qexec = QueryExecutionFactory.create(query, queryModel)) {
             final ResultSet result = qexec.execSelect();
 
-            this.saveResultsToCsv(result, cmd);
-        }
-    }
+            final String defaultOutputFile = String.join("", AppUtils.getTimeStamp("yyyyMMddHHmm"), "_out.csv");
 
-    /**
-     * Prototype method saving an RDF result set to a CSV file.
-     * @param result RDF result set that will be saved to a CSV file.
-     * @param cmd User provided {@link CommandLine} input.
-     */
-    private void saveResultsToCsv(final ResultSet result, final CommandLine cmd) {
-        final String defaultOutputFile = String.join("", AppUtils.getTimeStamp("yyyyMMddHHmm"), "_out.csv");
-        String outFile = cmd.getOptionValue("o", defaultOutputFile);
-
-        if (!FileService.checkFileExtension(outFile, "CSV")) {
-            outFile = String.join("", outFile, ".csv");
-        }
-
-        try {
-            LktCliController.LOGGER.info(String.join("", "Write query to file...\t\t(", outFile, ")"));
-
-            final File file = new File(outFile);
-
-            if (!file.exists()) {
-                file.createNewFile();
-            }
-
-            final FileOutputStream fop = new FileOutputStream(file);
-
-            ResultSetFormatter.outputAsCSV(fop, result);
-            fop.flush();
-            fop.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
+            RDFService.saveResultsToCsv(result, cmd.getOptionValue("o", defaultOutputFile));
         }
     }
 
