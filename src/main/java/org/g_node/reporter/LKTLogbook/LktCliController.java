@@ -101,10 +101,12 @@ public class LktCliController implements CliToolController {
                 " ORDER BY ?Project ?SubjectId ?ExperimentDate"
         );
 
+        //final String subjectsQuery = String.join("", queryPrefixes, "SELECT ?SubjectID ?Sex WHERE { ?node a gn:Subject ; gn:hasSubjectID ?SubjectID ; gn:hasSex ?Sex . FILTER regex(?Sex, \"m\")}");
+
         final String subjectsQuery = String.join("",
                 queryPrefixes,
                 "SELECT ?SubjectID ?PermitNumber ?SpeciesName ?ScientificName ?Sex ?BirthDate ?WithdrawalDate ",
-                "(MIN(?EntryDate) AS ?FirstEntry) ?Experimenter ?Comment ",
+                " ?FirstLogEntry ?FirstExperimenter ?LastLogEntry ?LastExperimenter ?ExitComment ?ExitLogEntry ?ExCom ",
                 " WHERE ",
                 "{",
                 "{",
@@ -118,16 +120,29 @@ public class LktCliController implements CliToolController {
                 "gn:hasPermit ?PermitID .",
                 "}",
                 "?PermitID gn:hasNumber ?PermitNumber .",
-                " OPTIONAL {",
-                "?node gn:hasSubjectLogEntry ?SubjectEntryID .",
-                "?SubjectEntryID gn:startedAt ?EntryDate .",
-                "?SubjectEntryID gn:hasExperimenter ?ExperimenterID .",
-                "?ExperimenterID foaf:name ?Experimenter .",
-                "?SubjectEntryID rdfs:comment ?Comment .",
+                "{",
+                    "SELECT ?node (MIN(?date) as ?FirstLogEntry)",
+                    " WHERE { ",
+                        "?node a gn:Subject ; gn:hasSubjectLogEntry ?sl . ?sl gn:startedAt ?date . ",
+                    "} GROUP BY ?node ?FirstLogEntry",
                 "}",
+                "{",
+                    "SELECT ?node (MAX(?date) as ?LastLogEntry)",
+                    " WHERE { ",
+                        "?node a gn:Subject ; gn:hasSubjectLogEntry ?sl . ?sl gn:startedAt ?date . ",
+                    "} GROUP BY ?node ?LastLogEntry",
                 "}",
-                " GROUP BY ?SubjectID ?PermitNumber ?SpeciesName ?ScientificName ?Sex ?BirthDate ?WithdrawalDate ",
-                "?FirstEntry ?Experimenter ?Comment",
+                "{",
+                    "SELECT ?node (MIN(?date) as ?ExitLogEntry)",
+                    " WHERE { ",
+                        "?node a gn:Subject ; gn:hasSubjectLogEntry ?sl . ?sl gn:startedAt ?date ; rdfs:comment ?c . ",
+                        " FILTER regex(?c, \".*(Euthanasie|Ausgeschleust).*\") ",
+                    "} GROUP BY ?node ?ExitLogEntry",
+                "}",
+                "OPTIONAL { ?node gn:hasSubjectLogEntry ?l2 . ?l2 gn:startedAt ?FirstLogEntry ; gn:hasExperimenter ?expUUID . ?expUUID foaf:name ?FirstExperimenter . }",
+                "OPTIONAL { ?node gn:hasSubjectLogEntry ?l3 . ?l3 gn:startedAt ?LastLogEntry ; gn:hasExperimenter ?expUUID2 ; rdfs:comment ?ExitComment . ?expUUID2 foaf:name ?LastExperimenter . }",
+                "OPTIONAL { ?node gn:hasSubjectLogEntry ?l4 . ?l4 gn:startedAt ?ExitLogEntry ; rdfs:comment ?ExCom . }",
+                "}",
                 " ORDER BY ?SubjectID ?EntryDate"
         );
 
@@ -136,6 +151,8 @@ public class LktCliController implements CliToolController {
                 put("SUBJECTS", subjectsQuery);
             } };
     }
+
+    final String blub = ".*(Euthanasie|Ausgeschleust).*";
 
     /**
      * Method returning the commandline options of the LKT reporter tool.
