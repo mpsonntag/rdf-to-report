@@ -101,8 +101,6 @@ public class LktCliController implements CliToolController {
                 " ORDER BY ?Project ?SubjectId ?ExperimentDate"
         );
 
-        //final String subjectsQuery = String.join("", queryPrefixes, "SELECT ?SubjectID ?Sex WHERE { ?node a gn:Subject ; gn:hasSubjectID ?SubjectID ; gn:hasSex ?Sex . FILTER regex(?Sex, \"m\")}");
-
         final String subjectsQuery = String.join("",
                 queryPrefixes,
                 "SELECT ?SubjectID ?PermitNumber ?SpeciesName ?ScientificName ?Sex ?BirthDate ?WithdrawalDate ",
@@ -139,8 +137,10 @@ public class LktCliController implements CliToolController {
                         " FILTER regex(?c, \".*(Euthanasie|Ausgeschleust).*\") ",
                     "} GROUP BY ?node ?ExitLogEntry",
                 "}",
-                "OPTIONAL { ?node gn:hasSubjectLogEntry ?l2 . ?l2 gn:startedAt ?FirstLogEntry ; gn:hasExperimenter ?expUUID . ?expUUID foaf:name ?FirstExperimenter . }",
-                "OPTIONAL { ?node gn:hasSubjectLogEntry ?l3 . ?l3 gn:startedAt ?LastLogEntry ; gn:hasExperimenter ?expUUID2 ; rdfs:comment ?ExitComment . ?expUUID2 foaf:name ?LastExperimenter . }",
+                "OPTIONAL { ?node gn:hasSubjectLogEntry ?l2 . ?l2 gn:startedAt ?FirstLogEntry ; ",
+                "gn:hasExperimenter ?expUUID . ?expUUID foaf:name ?FirstExperimenter . }",
+                "OPTIONAL { ?node gn:hasSubjectLogEntry ?l3 . ?l3 gn:startedAt ?LastLogEntry ; ",
+                "gn:hasExperimenter ?expUUID2 ; rdfs:comment ?ExitComment . ?expUUID2 foaf:name ?LastExperimenter . }",
                 "OPTIONAL { ?node gn:hasSubjectLogEntry ?l4 . ?l4 gn:startedAt ?ExitLogEntry ; rdfs:comment ?ExCom . }",
                 "}",
                 " ORDER BY ?SubjectID ?EntryDate"
@@ -151,8 +151,6 @@ public class LktCliController implements CliToolController {
                 put("SUBJECTS", subjectsQuery);
             } };
     }
-
-    final String blub = ".*(Euthanasie|Ausgeschleust).*";
 
     /**
      * Method returning the commandline options of the LKT reporter tool.
