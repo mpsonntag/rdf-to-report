@@ -214,8 +214,6 @@ public class LktCliController implements CliToolController {
             return;
         }
 
-        final Model queryModel = RDFService.openModelFromFile(inFile);
-
         String queryString = this.reports.get(cmd.getOptionValue("r").toUpperCase(Locale.ENGLISH));
 
         if ("CUSTOM".equals(cmd.getOptionValue("r").toUpperCase(Locale.ENGLISH))) {
@@ -240,6 +238,20 @@ public class LktCliController implements CliToolController {
                 }
             }
         }
+        final String defaultOutputFile = String.join("", AppUtils.getTimeStamp("yyyyMMddHHmm"), "_out.csv");
+
+        this.runQuery(inFile, queryString, cmd.getOptionValue("o", defaultOutputFile));
+    }
+
+    /**
+     * Method to run a sparql query on an RDF model and save the results to a CSV file.
+     * @param inFile Path and filename of an RDF file that is to be queried.
+     * @param queryString SPARQL query.
+     * @param outFile Path and filename where the results of the query is saved to.
+     */
+    private void runQuery(final String inFile, final String queryString, final String outFile) {
+
+        final Model queryModel = RDFService.openModelFromFile(inFile);
 
         final Query query = QueryFactory.create(queryString);
 
@@ -248,9 +260,7 @@ public class LktCliController implements CliToolController {
         try (QueryExecution qexec = QueryExecutionFactory.create(query, queryModel)) {
             final ResultSet result = qexec.execSelect();
 
-            final String defaultOutputFile = String.join("", AppUtils.getTimeStamp("yyyyMMddHHmm"), "_out.csv");
-
-            RDFService.saveResultsToCsv(result, cmd.getOptionValue("o", defaultOutputFile));
+            RDFService.saveResultsToCsv(result, outFile);
         }
     }
 
