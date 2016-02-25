@@ -16,6 +16,10 @@ import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
@@ -56,8 +60,6 @@ public class LktCliController implements CliToolController {
      * Entries have to be be upper case.
      */
     public LktCliController() {
-
-        // TODO add custom cli option, load SPARQL from file and use instead of prepared report.
 
         final String queryPrefixes = String.join("",
                 "prefix lkt:   <https://orcid.org/0000-0003-4857-1083#>",
@@ -134,7 +136,7 @@ public class LktCliController implements CliToolController {
                     "SELECT ?node (MIN(?date) as ?ExitLogEntry)",
                     " WHERE { ",
                         "?node a gn:Subject ; gn:hasSubjectLogEntry ?sl . ?sl gn:startedAt ?date ; rdfs:comment ?c . ",
-                        " FILTER regex(?c, \".*(Euthanasie|Ausgeschleust).*\") ",
+                        " FILTER regex(?c, \".*(Euthanasie|Ausgeschleust).*\", \"i\") ",
                     "} GROUP BY ?node ?ExitLogEntry",
                 "}",
                 "OPTIONAL { ?node gn:hasSubjectLogEntry ?l2 . ?l2 gn:startedAt ?FirstLogEntry ; ",
@@ -149,6 +151,7 @@ public class LktCliController implements CliToolController {
         this.reports = new HashMap<String, String>() { {
                 put("EXPERIMENTS", experimentsQuery);
                 put("SUBJECTS", subjectsQuery);
+                put("CUSTOM", "");
             } };
     }
 
@@ -167,11 +170,20 @@ public class LktCliController implements CliToolController {
         final Option opOutFile = CliOptionService.getOutFileOption("");
         final Option opOutFormat = CliOptionService.getOutFormatOption("", this.outputFormats);
 
+        final Option opQueryFile = Option.builder("c")
+                    .longOpt("custom-query-file")
+                    .desc(String.join("", "Optional: SPARQL query file. ",
+                            "-r CUSTOM requires option -c with a file containing a valid SPARQL query."))
+                    .hasArg()
+                    .valueSeparator()
+                    .build();
+
         options.addOption(opHelp);
         options.addOption(opInRdfFile);
         options.addOption(opReport);
         options.addOption(opOutFile);
         options.addOption(opOutFormat);
+        options.addOption(opQueryFile);
 
         return options;
     }
@@ -204,7 +216,30 @@ public class LktCliController implements CliToolController {
 
         final Model queryModel = RDFService.openModelFromFile(inFile);
 
-        final String queryString = this.reports.get(cmd.getOptionValue("r").toUpperCase(Locale.ENGLISH));
+        String queryString = this.reports.get(cmd.getOptionValue("r").toUpperCase(Locale.ENGLISH));
+
+        if ("CUSTOM".equals(cmd.getOptionValue("r").toUpperCase(Locale.ENGLISH))) {
+            final String customQueryFile = cmd.getOptionValue("c", "");
+            LktCliController.LOGGER.info(
+                    String.join("", "Using custom query option -c...\t(", customQueryFile , ")")
+            );
+            if ("".equals(cmd.getOptionValue("c", ""))) {
+                LktCliController.LOGGER.error(
+                        String.join("", "Missing required option: c")
+                );
+                return;
+            } else if (!CtrlCheckService.isExistingFile(cmd.getOptionValue("c", ""))) {
+                return;
+            } else {
+                try {
+                    queryString = new String(Files.readAllBytes(Paths.get(cmd.getOptionValue("c", ""))));
+                } catch (IOException exc) {
+                    LktCliController.LOGGER.error(exc.getMessage());
+                    exc.printStackTrace();
+                    return;
+                }
+            }
+        }
 
         final Query query = QueryFactory.create(queryString);
 
