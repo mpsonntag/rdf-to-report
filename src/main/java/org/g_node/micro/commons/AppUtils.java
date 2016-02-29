@@ -15,7 +15,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
-
 import org.apache.commons.codec.digest.DigestUtils;
 
 /**
@@ -26,12 +25,13 @@ import org.apache.commons.codec.digest.DigestUtils;
 public final class AppUtils {
 
     /**
-     * Return time stamp formatted corresponding to input format pattern.
-     * @param format Input format pattern.
+     * Return time stamp formatted corresponding to input dateTimeFormatPattern pattern.
+     * @param dateTimeFormatPattern Input dateTimeFormatPattern pattern.
+     *                              Use {@link DateTimeFormatter} pattern conventions.
      * @return Formatted timestamp.
      */
-    public static String getTimeStamp(final String format) {
-        return LocalDateTime.now().format(DateTimeFormatter.ofPattern(format));
+    public static String getTimeStamp(final String dateTimeFormatPattern) {
+        return LocalDateTime.now().format(DateTimeFormatter.ofPattern(dateTimeFormatPattern));
     }
 
     /**
