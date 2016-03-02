@@ -16,15 +16,12 @@ import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
@@ -49,12 +46,6 @@ public class LktCliController implements CliToolController {
      * Reports available to the reporter tool specific for the LKT Logbook use case.
      */
     private Map<String, String> reports;
-    /**
-     * Output formats available to the reporter tool. Entries should always be upper case.
-     */
-    //TODO this should be moved to a class where it can be accessed from other reporter tools as well.
-    private final Set<String> outputFormats = Collections.singleton("CSV");
-
     /**
      * Constructor populates the Map of queries available to this reporter.
      * Entries have to be be upper case.
@@ -168,7 +159,7 @@ public class LktCliController implements CliToolController {
         final Option opInRdfFile = CliOptionService.getInFileOption("");
         final Option opReport = CliOptionService.getReportOption("", this.reports.keySet());
         final Option opOutFile = CliOptionService.getOutFileOption("");
-        final Option opOutFormat = CliOptionService.getOutFormatOption("", this.outputFormats);
+        final Option opOutFormat = CliOptionService.getOutFormatOption("", RDFService.QUERY_RESULT_FILE_FORMATS);
 
         final Option opQueryFile = Option.builder("c")
                     .longOpt("custom-query-file")
@@ -210,7 +201,7 @@ public class LktCliController implements CliToolController {
         }
 
         final String outputFormat = cmd.getOptionValue("f", "CSV");
-        if (!CtrlCheckService.isSupportedOutputFormat(outputFormat, this.outputFormats)) {
+        if (!CtrlCheckService.isSupportedOutputFormat(outputFormat, RDFService.QUERY_RESULT_FILE_FORMATS)) {
             return;
         }
 
