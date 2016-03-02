@@ -230,7 +230,7 @@ public class LktCliController implements CliToolController {
                 }
             }
         }
-        final String defaultOutputFile = String.join("", AppUtils.getTimeStamp("yyyyMMddHHmm"), "_out.csv");
+        final String defaultOutputFile = String.join("", AppUtils.getTimeStamp("yyyyMMddHHmm"), "_out");
 
         this.runQuery(inFile, queryString, cmd.getOptionValue("o", defaultOutputFile), outputFormat);
     }
