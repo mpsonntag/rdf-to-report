@@ -150,11 +150,8 @@ public final class RDFService {
      */
     public static void saveResultsToCsv(final ResultSet result, final String fileName) {
 
-        String outFile = fileName;
-
-        if (!FileService.checkFileExtension(outFile, "CSV")) {
-            outFile = String.join("", outFile, ".csv");
-        }
+        final String outFile = !FileService.checkFileExtension(fileName, "CSV")
+                ? String.join("", fileName, ".csv") : fileName;
 
         try {
             RDFService.LOGGER.info(String.join("", "Write query to file...\t\t(", outFile, ")"));
