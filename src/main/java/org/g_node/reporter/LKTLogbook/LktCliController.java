@@ -159,7 +159,8 @@ public class LktCliController implements CliToolController {
         final Option opInRdfFile = CliOptionService.getInFileOption("");
         final Option opReport = CliOptionService.getReportOption("", this.reports.keySet());
         final Option opOutFile = CliOptionService.getOutFileOption("");
-        final Option opOutFormat = CliOptionService.getOutFormatOption("", RDFService.QUERY_RESULT_FILE_FORMATS);
+        final Option opOutFormat =
+                CliOptionService.getOutFormatOption("", RDFService.QUERY_RESULT_FILE_FORMATS.keySet());
 
         final Option opQueryFile = Option.builder("c")
                     .longOpt("custom-query-file")
@@ -201,7 +202,7 @@ public class LktCliController implements CliToolController {
         }
 
         final String outputFormat = cmd.getOptionValue("f", "CSV");
-        if (!CtrlCheckService.isSupportedOutputFormat(outputFormat, RDFService.QUERY_RESULT_FILE_FORMATS)) {
+        if (!CtrlCheckService.isSupportedOutputFormat(outputFormat, RDFService.QUERY_RESULT_FILE_FORMATS.keySet())) {
             return;
         }
 
