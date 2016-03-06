@@ -7,7 +7,7 @@
 
     <groupId>org.g_node</groupId>
     <artifactId>rdf-to-report</artifactId>
-    <version>1.02-Beta</version>
+    <version>1.03-Beta</version>
     <packaging>jar</packaging>
     <name>rdf-to-report</name>
     <url>http://maven.apache.org</url>
