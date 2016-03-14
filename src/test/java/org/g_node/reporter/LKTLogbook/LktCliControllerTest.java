@@ -47,6 +47,8 @@ public class LktCliControllerTest {
     private final String tmpRoot = System.getProperty("java.io.tmpdir");
     private final String testFolderName = "LktCliControllerTest";
     private final Path testFileFolder = Paths.get(tmpRoot, testFolderName);
+    private final String testRdfFileName = "test.ttl";
+    private final File testRdfFile = this.testFileFolder.resolve(this.testRdfFileName).toFile();
 
     /**
      * Redirect Error and Out stream.
@@ -54,6 +56,9 @@ public class LktCliControllerTest {
      */
     @Before
     public void setUp() throws Exception {
+        final String miniTTL = "@prefix foaf: <http://xmlns.com/foaf/0.1/> . _:a foaf:name \"MainName\"";
+        FileUtils.write(this.testRdfFile, miniTTL);
+
         this.stdout = System.out;
         this.outStream = new ByteArrayOutputStream();
         System.setOut(new PrintStream(this.outStream));
@@ -206,6 +211,22 @@ public class LktCliControllerTest {
         App.main(cliArgs);
         assertThat(this.outStream.toString()).contains(String.join("",
                 "Unsupported output format: '", invalidOutFormat, "'"));
+    }
+
+    @Test
+    public void testCustomCliMissing() throws Exception {
+        final String useCase = "lkt";
+        final String errorMessage = "Missing required option: c";
+
+        final String[] cliArgs = new String[5];
+        cliArgs[0] = useCase;
+        cliArgs[1] = "-i";
+        cliArgs[2] = this.testRdfFile.getAbsolutePath();
+        cliArgs[3] = "-r";
+        cliArgs[4] = "custom";
+
+        App.main(cliArgs);
+        assertThat(this.outStream.toString()).contains(errorMessage);
     }
 
 }
