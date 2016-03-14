@@ -24,7 +24,7 @@ import org.g_node.micro.commons.RDFService;
  *
  * @author Michael Sonntag (sonntag@bio.lmu.de)
  */
-public class LktReporter {
+public class LktJenaReporter {
     /**
      * Access to the main LOGGER.
      */
@@ -40,14 +40,14 @@ public class LktReporter {
     public static void runReport(final String inFile, final String queryString,
                                  final String outFile, final String outputFormat) {
 
-        LktReporter.LOGGER.info("Start query...");
+        LktJenaReporter.LOGGER.info("Start query...");
         final Model queryModel = RDFService.openModelFromFile(inFile);
         final Query query = QueryFactory.create(queryString);
 
         try (QueryExecution qexec = QueryExecutionFactory.create(query, queryModel)) {
             final ResultSet result = qexec.execSelect();
 
-            LktReporter.LOGGER.info("Save results...");
+            LktJenaReporter.LOGGER.info("Save results...");
             RDFService.saveResultsToSupportedFile(result, outputFormat, outFile);
         }
     }
