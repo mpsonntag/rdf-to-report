@@ -203,9 +203,7 @@ public class LktCliController implements CliToolController {
                     String.join("", "Using custom query option -c...\t(", customQueryFile , ")")
             );
             if ("".equals(cmd.getOptionValue("c", ""))) {
-                LktCliController.LOGGER.error(
-                        String.join("", "Missing required option: c")
-                );
+                LktCliController.LOGGER.error("Missing required option: c");
                 return;
             } else if (!CtrlCheckService.isExistingFile(cmd.getOptionValue("c", ""))) {
                 return;
