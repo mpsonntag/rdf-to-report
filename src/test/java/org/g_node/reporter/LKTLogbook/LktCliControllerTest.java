@@ -16,19 +16,21 @@ import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
+import com.hp.hpl.jena.query.QueryParseException;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
-import static org.assertj.core.api.Assertions.assertThat;
 import org.g_node.App;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Unit tests for the LktCliController class. Output and Error streams are redirected
+ * Unit tests for the {@link LktCliController} class. Output and Error streams are redirected
  * from the console to a different PrintStream and reset after tests are finished
  * to avoid mixing tool error messages with actual test error messages.
  *
@@ -46,7 +48,7 @@ public class LktCliControllerTest {
     private final File testRdfFile = this.testFileFolder.resolve(this.testRdfFileName).toFile();
 
     /**
-     * Redirect Error and Out stream.
+     * Redirect Error and Out stream. Set up temporary folder and minimal RDF file.
      * @throws Exception
      */
     @Before
@@ -68,7 +70,7 @@ public class LktCliControllerTest {
     }
 
     /**
-     * Reset Out stream to the console after the tests are done.
+     * Reset Out stream to the console after the tests are done. Remove all testfiles and temporary folder.
      * @throws Exception
      */
     @After
@@ -180,6 +182,49 @@ public class LktCliControllerTest {
 
         App.main(cliArgs);
         assertThat(this.outStream.toString()).contains(errorMessage);
+    }
+
+    @Test
+    public void testCustomCliInvalidFile() throws Exception {
+        final String useCase = "lkt";
+        final String missingFile = "iDoNotExist";
+        final String errorMessage = String.join("", "File ", missingFile, " does not exist.");
+
+        final String[] cliArgs = new String[7];
+        cliArgs[0] = useCase;
+        cliArgs[1] = "-i";
+        cliArgs[2] = this.testRdfFile.getAbsolutePath();
+        cliArgs[3] = "-r";
+        cliArgs[4] = "custom";
+        cliArgs[5] = "-c";
+        cliArgs[6] = missingFile;
+
+        App.main(cliArgs);
+        assertThat(this.outStream.toString()).contains(errorMessage);
+    }
+
+    @Test
+    public void testCustomCliInvalidQuery() throws Exception {
+        final String useCase = "lkt";
+
+        final String notQueryFileName = "testQuery.txt";
+        final File notQueryFile = this.testFileFolder.resolve(notQueryFileName).toFile();
+        FileUtils.write(notQueryFile, "I am not a query file!");
+
+        final String errorMessage = "Lexical error at line 1, column 2.  Encountered: \" \" (32), after : \"I\"";
+
+        final String[] cliArgs = new String[7];
+        cliArgs[0] = useCase;
+        cliArgs[1] = "-i";
+        cliArgs[2] = this.testRdfFile.getAbsolutePath();
+        cliArgs[3] = "-r";
+        cliArgs[4] = "custom";
+        cliArgs[5] = "-c";
+        cliArgs[6] = notQueryFile.getAbsolutePath();
+
+        final Throwable thrown = catchThrowable(
+                () -> App.main(cliArgs));
+        assertThat(thrown).isInstanceOf(QueryParseException.class).hasMessageContaining(errorMessage);
     }
 
 }
