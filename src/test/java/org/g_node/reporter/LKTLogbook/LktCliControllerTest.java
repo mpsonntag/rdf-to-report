@@ -10,27 +10,22 @@
 
 package org.g_node.reporter.LKTLogbook;
 
-import com.hp.hpl.jena.rdf.model.ModelFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.PrintStream;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.apache.commons.io.FileUtils;
-import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.riot.RDFFormat;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.g_node.App;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Unit tests for the LktCliController class. Output and Error streams are redirected
@@ -105,15 +100,13 @@ public class LktCliControllerTest {
 
     @Test
     public void testRunFalseInputFile() throws Exception {
-
-        // Apache Jena does not properly close files that are not
-        // RDF files by file ending e.g. ".txt" files. Trying to delete such
-        // a file will lead to an error. For this reason an existing txt file is used.
-        final URL testFileName = this.getClass().getResource("/testOpenInvalidRDF.txt");
+        final String testNotRdfFileName = "test.txt";
+        final File testNotRdfFile = this.testFileFolder.resolve(testNotRdfFileName).toFile();
+        FileUtils.write(testNotRdfFile, "I am not an RDF file!");
 
         final String testInvalidRDFFileName = "testFalseInFile.ttl";
-        final File currInvalidRdfFile = this.testFileFolder.resolve(testInvalidRDFFileName).toFile();
-        FileUtils.write(currInvalidRdfFile, "This is an invalid rdf file");
+        final File testInvalidRdfFile = this.testFileFolder.resolve(testInvalidRDFFileName).toFile();
+        FileUtils.write(testInvalidRdfFile, "This is an invalid rdf file");
 
         final String useCase = "lkt";
 
@@ -122,16 +115,13 @@ public class LktCliControllerTest {
         cliArgs[1] = "-r";
         cliArgs[2] = "val";
         cliArgs[3] = "-i";
-        cliArgs[4] = Paths.get(testFileName.toURI()).toFile().toString();
+        cliArgs[4] = testNotRdfFile.getAbsolutePath();
 
         App.main(cliArgs);
         assertThat(this.outStream.toString()).contains("Failed to load file");
         assertThat(this.outStream.toString()).contains("Failed to determine the content type");
 
-        cliArgs[4] = this.testFileFolder
-                .resolve(testInvalidRDFFileName)
-                .toAbsolutePath()
-                .normalize().toString();
+        cliArgs[4] = testInvalidRdfFile.getAbsolutePath();
 
         App.main(cliArgs);
         assertThat(this.outStream.toString()).contains("Failed to load file");
@@ -140,77 +130,40 @@ public class LktCliControllerTest {
 
     @Test
     public void testInvalidReport() throws Exception {
-        final String testRdfFileName = "testInvalidReport.ttl";
-        final File currRdfFile = this.testFileFolder.resolve(testRdfFileName).toFile();
-        FileUtils.write(currRdfFile, "");
-
-        try {
-            final FileOutputStream fos = new FileOutputStream(currRdfFile);
-            try {
-                RDFDataMgr.write(fos, ModelFactory.createDefaultModel(), RDFFormat.TURTLE_PRETTY);
-                fos.close();
-            } catch (IOException ioExc) {
-                ioExc.printStackTrace();
-            }
-        } catch (FileNotFoundException exc) {
-            exc.printStackTrace();
-        }
-
         final String useCase = "lkt";
         final String invalidReportValue = "argumentValue";
+        final String errorMessage = String.join("",
+                "'", invalidReportValue,"' is not a supported value of command line option ");
 
         final String[] cliArgs = new String[5];
         cliArgs[0] = useCase;
         cliArgs[1] = "-i";
-        cliArgs[2] = this.testFileFolder
-                .resolve(testRdfFileName)
-                .toAbsolutePath()
-                .normalize().toString();
+        cliArgs[2] = this.testRdfFile.getAbsolutePath();
         cliArgs[3] = "-r";
         cliArgs[4] = invalidReportValue;
 
         App.main(cliArgs);
-        assertThat(this.outStream.toString()).contains(String.join("",
-                "'", invalidReportValue,"' is not a supported value of command line option "));
+        assertThat(this.outStream.toString()).contains(errorMessage);
     }
 
     @Test
     public void testInvalidOutputFormat() throws Exception {
-        final String testRdfFileName = "testInvalidOutputFormat.ttl";
-        final File currRdfFile = this.testFileFolder.resolve(testRdfFileName).toFile();
-        FileUtils.write(currRdfFile, "");
-
-        try {
-            final FileOutputStream fos = new FileOutputStream(currRdfFile);
-            try {
-                RDFDataMgr.write(fos, ModelFactory.createDefaultModel(), RDFFormat.TURTLE_PRETTY);
-                fos.close();
-            } catch (IOException ioExc) {
-                ioExc.printStackTrace();
-            }
-        } catch (FileNotFoundException exc) {
-            exc.printStackTrace();
-        }
-
         final String useCase = "lkt";
         final String invalidOutFormat = "invalidFormat";
+        final String errorMessage = String.join("", "Unsupported output format: '", invalidOutFormat, "'");
+        final String reportUsed = "experiments";
 
         final String[] cliArgs = new String[7];
         cliArgs[0] = useCase;
         cliArgs[1] = "-i";
-        cliArgs[2] = this.testFileFolder
-                .resolve(testRdfFileName)
-                .toAbsolutePath()
-                .normalize().toString();
+        cliArgs[2] = this.testRdfFile.getAbsolutePath();
         cliArgs[3] = "-r";
-        // TODO access actual existing reports from the lkt usecase
-        cliArgs[4] = "experiments";
+        cliArgs[4] = reportUsed;
         cliArgs[5] = "-f";
         cliArgs[6] = invalidOutFormat;
 
         App.main(cliArgs);
-        assertThat(this.outStream.toString()).contains(String.join("",
-                "Unsupported output format: '", invalidOutFormat, "'"));
+        assertThat(this.outStream.toString()).contains(errorMessage);
     }
 
     @Test
