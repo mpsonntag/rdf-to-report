@@ -117,6 +117,10 @@ public class LktCliControllerTest {
         cliArgs[1] = "-r";
         cliArgs[2] = "val";
         cliArgs[3] = "-i";
+
+        // The following code leads to an error that leaves the file stream to ../test.txt open.
+        // This error comes from Jena's RDFDataMgr.loadModel where the file stream is not closed,
+        // if the content type of a file cannot be determined.
         cliArgs[4] = testNotRdfFile.getAbsolutePath();
 
         App.main(cliArgs);
