@@ -10,23 +10,20 @@
 
 package org.g_node.reporter.LKTLogbook;
 
+import com.hp.hpl.jena.query.QueryParseException;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-
-import com.hp.hpl.jena.query.QueryParseException;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
-import org.g_node.App;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -94,6 +91,16 @@ public class LktJenaReporterTest {
                 () -> LktJenaReporter.runReport(this.testRdfFile.getAbsolutePath(), invalidQuery, outFile, ""));
         assertThat(this.outStream.toString()).contains(errorMessage);
         assertThat(thrown).isInstanceOf(QueryParseException.class);
+    }
+
+    @Test
+    public void testRunReporterValidQuery() throws Exception {
+        final String query = "PREFIX foaf: <http://xmlns.com/foaf/0.1/> SELECT ?name WHERE {?node foaf:name ?name . }";
+        final String outFile = this.testFileFolder.resolve("out.csv").toString();
+        final String outFormat = "CSV";
+
+        LktJenaReporter.runReport(this.testRdfFile.getAbsolutePath(), query, outFile, outFormat);
+        assertThat(Files.exists(Paths.get(outFile))).isTrue();
     }
 
 }
