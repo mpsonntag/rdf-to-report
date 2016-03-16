@@ -19,7 +19,6 @@ import com.hp.hpl.jena.vocabulary.RDFS;
 import java.net.URL;
 import java.nio.file.Paths;
 import static org.assertj.core.api.Assertions.assertThat;
-import org.g_node.micro.commons.RDFService;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -70,7 +69,7 @@ public class RdfUtilsJenaTest {
         final URL testFileNameURL = this.getClass().getResource("/testFiles/RemoveAnonNodeTest.ttl");
         final String testFileName = Paths.get(testFileNameURL.toURI()).toFile().toString();
 
-        this.baseModel = RDFService.openModelFromFile(testFileName);
+        this.baseModel = RdfFileServiceJena.openModelFromFile(testFileName);
 
         assertThat(this.baseModel.size()).isEqualTo(7);
 

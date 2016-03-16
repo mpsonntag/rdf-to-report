@@ -22,7 +22,7 @@ import org.apache.commons.cli.Options;
 import org.apache.log4j.Logger;
 import org.g_node.micro.commons.AppUtils;
 import org.g_node.micro.commons.CliToolController;
-import org.g_node.micro.commons.RDFService;
+import org.g_node.micro.rdf.RdfFileServiceJena;
 import org.g_node.srv.CliOptionService;
 import org.g_node.srv.CtrlCheckService;
 
@@ -149,7 +149,7 @@ public class LktCliController implements CliToolController {
         final Option opReport = CliOptionService.getReportOption("", this.reports.keySet());
         final Option opOutFile = CliOptionService.getOutFileOption("");
         final Option opOutFormat =
-                CliOptionService.getOutFormatOption("", RDFService.QUERY_RESULT_FILE_FORMATS.keySet());
+                CliOptionService.getOutFormatOption("", RdfFileServiceJena.QUERY_RESULT_FILE_FORMATS.keySet());
 
         final Option opQueryFile = Option.builder("c")
                     .longOpt("custom-query-file")
@@ -182,7 +182,7 @@ public class LktCliController implements CliToolController {
             return;
         }
 
-        if (!RDFService.isValidRdfFile(inFile)) {
+        if (!RdfFileServiceJena.isValidRdfFile(inFile)) {
             return;
         }
 
@@ -191,7 +191,8 @@ public class LktCliController implements CliToolController {
         }
 
         final String outputFormat = cmd.getOptionValue("f", "CSV");
-        if (!CtrlCheckService.isSupportedOutputFormat(outputFormat, RDFService.QUERY_RESULT_FILE_FORMATS.keySet())) {
+        if (!CtrlCheckService
+                .isSupportedOutputFormat(outputFormat, RdfFileServiceJena.QUERY_RESULT_FILE_FORMATS.keySet())) {
             return;
         }
 

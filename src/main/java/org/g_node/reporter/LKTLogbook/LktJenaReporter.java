@@ -18,7 +18,7 @@ import com.hp.hpl.jena.query.QueryParseException;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
 import org.apache.log4j.Logger;
-import org.g_node.micro.commons.RDFService;
+import org.g_node.micro.rdf.RdfFileServiceJena;
 
 /**
  * Class handles query execution and saving the results.
@@ -42,7 +42,7 @@ public class LktJenaReporter {
                                  final String outFile, final String outputFormat) {
 
         LktJenaReporter.LOGGER.info("Start query...");
-        final Model queryModel = RDFService.openModelFromFile(inFile);
+        final Model queryModel = RdfFileServiceJena.openModelFromFile(inFile);
 
         try {
             final Query query = QueryFactory.create(queryString);
@@ -50,7 +50,7 @@ public class LktJenaReporter {
             final ResultSet result = qexec.execSelect();
 
             LktJenaReporter.LOGGER.info("Save results...");
-            RDFService.saveResultsToSupportedFile(result, outputFormat, outFile);
+            RdfFileServiceJena.saveResultsToSupportedFile(result, outputFormat, outFile);
         } catch (QueryParseException e) {
             final String errorMessage = String.join("",
                     "Invalid query: ", e.getMessage());
