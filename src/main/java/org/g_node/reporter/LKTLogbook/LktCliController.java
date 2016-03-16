@@ -182,7 +182,7 @@ public class LktCliController implements CliToolController {
             return;
         }
 
-        if (!CtrlCheckService.isValidRdfFile(inFile)) {
+        if (!RDFService.isValidRdfFile(inFile)) {
             return;
         }
 
