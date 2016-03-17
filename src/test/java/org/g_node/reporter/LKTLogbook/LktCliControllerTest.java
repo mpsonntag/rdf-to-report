@@ -10,6 +10,7 @@
 
 package org.g_node.reporter.LKTLogbook;
 
+import com.hp.hpl.jena.query.QueryParseException;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
@@ -18,7 +19,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import com.hp.hpl.jena.query.QueryParseException;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
@@ -48,7 +48,7 @@ public class LktCliControllerTest {
     private final File testRdfFile = this.testFileFolder.resolve(this.testRdfFileName).toFile();
 
     /**
-     * Redirect Error and Out stream. Set up temporary folder and minimal RDF file.
+     * Redirect Error and Out stream. Set up temporary folder and minimal RDF file. Setup Logger.
      * @throws Exception
      */
     @Before
@@ -117,10 +117,6 @@ public class LktCliControllerTest {
         cliArgs[1] = "-r";
         cliArgs[2] = "val";
         cliArgs[3] = "-i";
-
-        // The following code leads to an error that leaves the file stream to ../test.txt open.
-        // This error comes from Jena's RDFDataMgr.loadModel where the file stream is not closed,
-        // if the content type of a file cannot be determined.
         cliArgs[4] = testNotRdfFile.getAbsolutePath();
 
         App.main(cliArgs);
@@ -229,6 +225,58 @@ public class LktCliControllerTest {
         final Throwable thrown = catchThrowable(
                 () -> App.main(cliArgs));
         assertThat(thrown).isInstanceOf(QueryParseException.class).hasMessageContaining(errorMessage);
+    }
+
+    @Test
+    public void testCheckOutputFile() throws Exception {
+        final String useCase = "lkt";
+
+        final String query = "PREFIX foaf: <http://xmlns.com/foaf/0.1/> SELECT ?name WHERE {?node foaf:name ?name . }";
+        final String queryFileName = "query.sparql";
+        final File queryFile = this.testFileFolder.resolve(queryFileName).toFile();
+        FileUtils.write(queryFile, query);
+
+        final Path outFile = this.testFileFolder.resolve("out.csv");
+
+        final String[] cliArgs = new String[7];
+        cliArgs[0] = useCase;
+        cliArgs[1] = "-i";
+        cliArgs[2] = this.testRdfFile.getAbsolutePath();
+        cliArgs[3] = "-r";
+        cliArgs[4] = "experiments";
+        cliArgs[5] = "-o";
+        cliArgs[6] = outFile.toString();
+
+        assertThat(Files.exists(outFile)).isFalse();
+        App.main(cliArgs);
+        assertThat(Files.exists(outFile)).isTrue();
+    }
+
+    @Test
+    public void testCustomQueryCheckOutputFile() throws Exception {
+        final String useCase = "lkt";
+
+        final String query = "PREFIX foaf: <http://xmlns.com/foaf/0.1/> SELECT ?name WHERE {?node foaf:name ?name . }";
+        final String queryFileName = "query.sparql";
+        final File queryFile = this.testFileFolder.resolve(queryFileName).toFile();
+        FileUtils.write(queryFile, query);
+
+        final Path outFile = this.testFileFolder.resolve("out.csv");
+
+        final String[] cliArgs = new String[9];
+        cliArgs[0] = useCase;
+        cliArgs[1] = "-i";
+        cliArgs[2] = this.testRdfFile.getAbsolutePath();
+        cliArgs[3] = "-r";
+        cliArgs[4] = "custom";
+        cliArgs[5] = "-c";
+        cliArgs[6] = queryFile.getAbsolutePath();
+        cliArgs[7] = "-o";
+        cliArgs[8] = outFile.toString();
+
+        assertThat(Files.exists(outFile)).isFalse();
+        App.main(cliArgs);
+        assertThat(Files.exists(outFile)).isTrue();
     }
 
 }
