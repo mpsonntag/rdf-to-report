@@ -20,7 +20,7 @@ public final class LktQueries {
     /**
      * Collection of RDF prefixes used by the SPARQL queries provided by this class.
      */
-    private final String queryPrefixes = String.join("",
+    public static final String QUERY_PREFIXES = String.join("",
             "prefix lkt:   <https://orcid.org/0000-0003-4857-1083#>",
             "prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>",
             "prefix gn:    <https://github.com/G-Node/neuro-ontology/>",
@@ -33,8 +33,14 @@ public final class LktQueries {
     /**
      * SPARQL Query returning information centered on experiments.
      */
-    private final String experimentsQuery = String.join("",
-            this.queryPrefixes,
+    public static final String EXPERIMENTS_QUERY = String.join("",
+            "prefix lkt:   <https://orcid.org/0000-0003-4857-1083#>",
+            "prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>",
+            "prefix gn:    <https://github.com/G-Node/neuro-ontology/>",
+            "prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#>",
+            "prefix xs:    <http://www.w3.org/2001/XMLSchema#>",
+            "prefix foaf:  <http://xmlns.com/foaf/0.1/>",
+            "prefix dc:    <http://purl.org/dc/terms/>",
             "SELECT ?Project ?Experiment ?ExperimentDate ?Paradigm ?ParadigmSpecifics ",
             "?Experimenter ?ExperimentComment ?SubjectId ?BirthDate ?Sex ?WithdrawalDate ",
             "?PermitNumber ?ExperimentId ",
@@ -68,8 +74,14 @@ public final class LktQueries {
     /**
      * SPARQL query returning information centered on trial subjects.
      */
-    private final String subjectsQuery = String.join("",
-            this.queryPrefixes,
+    public static final String SUBJECTS_QUERY = String.join("",
+            "prefix lkt:   <https://orcid.org/0000-0003-4857-1083#>",
+            "prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>",
+            "prefix gn:    <https://github.com/G-Node/neuro-ontology/>",
+            "prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#>",
+            "prefix xs:    <http://www.w3.org/2001/XMLSchema#>",
+            "prefix foaf:  <http://xmlns.com/foaf/0.1/>",
+            "prefix dc:    <http://purl.org/dc/terms/>",
             "SELECT ?SubjectID ?PermitNumber ?SpeciesName ?ScientificName ?Sex ?BirthDate ?WithdrawalDate ",
             " ?FirstLogEntry ?FirstExperimenter ?LastLogEntry ?LastExperimenter ?LastComment ",
             "?ExitLogEntry ?ExitComment ",
@@ -107,21 +119,5 @@ public final class LktQueries {
             "}",
             " ORDER BY ?SubjectID ?EntryDate"
     );
-
-    /**
-     * Returns the experiment SPARQL query.
-     * @return SPARQL query string.
-     */
-    public String getExperimentsQuery() {
-        return this.experimentsQuery;
-    }
-
-    /**
-     * Returns the trial subject SPARQL query.
-     * @return SPARQL query string.
-     */
-    public String getSubjectsQuery() {
-        return this.subjectsQuery;
-    }
 
 }
