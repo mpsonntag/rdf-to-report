@@ -16,6 +16,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
@@ -177,6 +178,8 @@ public class LktCliController implements CliToolController {
      */
     public final void run(final CommandLine cmd) {
 
+        final Set<String> resultFileFormats = RdfFileServiceJena.QUERY_RESULT_FILE_FORMATS.keySet();
+
         final String inFile = cmd.getOptionValue("i");
         if (!CtrlCheckService.isExistingFile(inFile)) {
             return;
@@ -191,8 +194,7 @@ public class LktCliController implements CliToolController {
         }
 
         final String outputFormat = cmd.getOptionValue("f", "CSV");
-        if (!CtrlCheckService
-                .isSupportedOutputFormat(outputFormat, RdfFileServiceJena.QUERY_RESULT_FILE_FORMATS.keySet())) {
+        if (!CtrlCheckService.isSupportedOutputFormat(outputFormat, resultFileFormats)) {
             return;
         }
 
