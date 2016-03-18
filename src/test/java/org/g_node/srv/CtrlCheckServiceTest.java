@@ -36,12 +36,12 @@ public class CtrlCheckServiceTest {
     private PrintStream stdout;
 
     private final String tmpRoot = System.getProperty("java.io.tmpdir");
-    private final String testFolderName = "ctrlCheckServiceTest";
+    private final String testFolderName = this.getClass().getSimpleName();
     private final String testFileName = "test.txt";
     private final Path testFileFolder = Paths.get(tmpRoot, testFolderName);
 
     /**
-     * Create a test folder and the main test file in the java temp directory.
+     * Create a test folder and the main test file in the java temp directory and redirect the output stream.
      * @throws Exception
      */
     @Before
@@ -55,7 +55,7 @@ public class CtrlCheckServiceTest {
     }
 
     /**
-     * Remove all created folders and files after the tests are done.
+     * Remove all created folders and files after the tests are done and reset the output stream to the console.
      * @throws Exception
      */
     @After
@@ -68,9 +68,8 @@ public class CtrlCheckServiceTest {
     }
 
     /**
-     * Test if the method returns false when presented with a
-     * String referencing a non existing file and returns true if it is
-     * presented with String referencing an existing file.
+     * Test if the method returns false when presented with a String referencing a non existing file and
+     * returns true if it is presented with String referencing an existing file.
      * @throws Exception
      */
     @Test
@@ -91,8 +90,7 @@ public class CtrlCheckServiceTest {
     }
 
     /**
-     * Test that the method prints the correct error message if a given String is not
-     * found in a given Set.
+     * Test that the method prints the correct error message if a given String is not found in a given Set.
      * @throws Exception
      */
     @Test

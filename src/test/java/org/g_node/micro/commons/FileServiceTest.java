@@ -30,7 +30,7 @@ import org.junit.Test;
 public class FileServiceTest {
 
     private final String tmpRoot = System.getProperty("java.io.tmpdir");
-    private final String testFolderName = "fileServiceTest";
+    private final String testFolderName = this.getClass().getSimpleName();
     private final String testFileName = "test.txt";
     private final Path testFileFolder = Paths.get(tmpRoot, testFolderName);
 

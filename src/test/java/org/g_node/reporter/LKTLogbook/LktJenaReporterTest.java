@@ -17,19 +17,19 @@ import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Unit tests for the {@link LktJenaReporter} class. Output and Error streams are redirected
+ * Unit tests for the {@link LktJenaReporter} class. The output stream is redirected
  * from the console to a different PrintStream and reset after tests are finished
  * to avoid mixing tool error messages with actual test error messages.
  *
@@ -41,7 +41,7 @@ public class LktJenaReporterTest {
     private PrintStream stdout;
 
     private final String tmpRoot = System.getProperty("java.io.tmpdir");
-    private final String testFolderName = "LktCliControllerTest";
+    private final String testFolderName = this.getClass().getSimpleName();
     private final Path testFileFolder = Paths.get(tmpRoot, testFolderName);
     private final String testRdfFileName = "test.ttl";
     private final File testRdfFile = this.testFileFolder.resolve(this.testRdfFileName).toFile();
