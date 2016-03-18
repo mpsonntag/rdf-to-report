@@ -29,13 +29,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Unit tests for the {@link LktJenaReporter} class. The output stream is redirected
+ * Unit tests for the {@link LktReporterJena} class. The output stream is redirected
  * from the console to a different PrintStream and reset after tests are finished
  * to avoid mixing tool error messages with actual test error messages.
  *
  * @author Michael Sonntag (sonntag@bio.lmu.de)
  */
-public class LktJenaReporterTest {
+public class LktReporterJenaTest {
 
     private ByteArrayOutputStream outStream;
     private PrintStream stdout;
@@ -88,7 +88,7 @@ public class LktJenaReporterTest {
         final String errorMessage = "Invalid query: ";
 
         final Throwable thrown = catchThrowable(
-                () -> LktJenaReporter.runReport(this.testRdfFile.getAbsolutePath(), invalidQuery, outFile, ""));
+                () -> LktReporterJena.runReport(this.testRdfFile.getAbsolutePath(), invalidQuery, outFile, ""));
         assertThat(this.outStream.toString()).contains(errorMessage);
         assertThat(thrown).isInstanceOf(QueryParseException.class);
     }
@@ -99,7 +99,7 @@ public class LktJenaReporterTest {
         final String outFile = this.testFileFolder.resolve("out.csv").toString();
         final String outFormat = "CSV";
 
-        LktJenaReporter.runReport(this.testRdfFile.getAbsolutePath(), query, outFile, outFormat);
+        LktReporterJena.runReport(this.testRdfFile.getAbsolutePath(), query, outFile, outFormat);
         assertThat(Files.exists(Paths.get(outFile))).isTrue();
     }
 

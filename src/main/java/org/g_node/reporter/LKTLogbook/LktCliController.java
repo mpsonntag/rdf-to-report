@@ -140,7 +140,7 @@ public class LktCliController implements CliToolController {
         }
         final String defaultOutputFile = String.join("", AppUtils.getTimeStamp("yyyyMMddHHmm"), "_out");
 
-        LktJenaReporter.runReport(inFile, queryString, cmd.getOptionValue("o", defaultOutputFile), outputFormat);
+        LktReporterJena.runReport(inFile, queryString, cmd.getOptionValue("o", defaultOutputFile), outputFormat);
     }
 
 }

@@ -25,7 +25,7 @@ import org.g_node.micro.rdf.RdfFileServiceJena;
  *
  * @author Michael Sonntag (sonntag@bio.lmu.de)
  */
-public class LktJenaReporter {
+public class LktReporterJena {
     /**
      * Access to the main LOGGER.
      */
@@ -41,7 +41,7 @@ public class LktJenaReporter {
     public static void runReport(final String inFile, final String queryString,
                                  final String outFile, final String outputFormat) {
 
-        LktJenaReporter.LOGGER.info("Start query...");
+        LktReporterJena.LOGGER.info("Start query...");
         final Model queryModel = RdfFileServiceJena.openModelFromFile(inFile);
 
         try {
@@ -49,12 +49,12 @@ public class LktJenaReporter {
             final QueryExecution qexec = QueryExecutionFactory.create(query, queryModel);
             final ResultSet result = qexec.execSelect();
 
-            LktJenaReporter.LOGGER.info("Save results...");
+            LktReporterJena.LOGGER.info("Save results...");
             RdfFileServiceJena.saveResultsToSupportedFile(result, outputFormat, outFile);
         } catch (QueryParseException e) {
             final String errorMessage = String.join("",
                     "Invalid query: ", e.getMessage());
-            LktJenaReporter.LOGGER.error(errorMessage);
+            LktReporterJena.LOGGER.error(errorMessage);
             throw e;
         }
     }
