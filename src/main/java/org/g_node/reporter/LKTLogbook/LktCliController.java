@@ -23,9 +23,9 @@ import org.apache.commons.cli.Options;
 import org.apache.log4j.Logger;
 import org.g_node.micro.commons.AppUtils;
 import org.g_node.micro.commons.CliToolController;
-import org.g_node.micro.rdf.RdfFileServiceJena;
 import org.g_node.srv.CliOptionService;
 import org.g_node.srv.CtrlCheckService;
+import org.g_node.srv.RdfServiceSwitch;
 
 /**
  * Class handling how to fetch reports from an RDF file specific to the LKT Logbook use case of Kay Thurley.
@@ -61,6 +61,8 @@ public class LktCliController implements CliToolController {
      */
     public final Options options() {
 
+        final Set<String> resultFileFormats = RdfServiceSwitch.QUERY_RESULT_FILE_FORMATS;
+
         final Options options = new Options();
 
         final Option opHelp = CliOptionService.getHelpOption("");
@@ -68,7 +70,7 @@ public class LktCliController implements CliToolController {
         final Option opReport = CliOptionService.getReportOption("", this.reports.keySet());
         final Option opOutFile = CliOptionService.getOutFileOption("");
         final Option opOutFormat =
-                CliOptionService.getOutFormatOption("", RdfFileServiceJena.QUERY_RESULT_FILE_FORMATS.keySet());
+                CliOptionService.getOutFormatOption("", resultFileFormats);
 
         final Option opQueryFile = Option.builder("c")
                     .longOpt("custom-query-file")
@@ -96,14 +98,14 @@ public class LktCliController implements CliToolController {
      */
     public final void run(final CommandLine cmd) {
 
-        final Set<String> resultFileFormats = RdfFileServiceJena.QUERY_RESULT_FILE_FORMATS.keySet();
+        final Set<String> resultFileFormats = RdfServiceSwitch.QUERY_RESULT_FILE_FORMATS;
 
         final String inFile = cmd.getOptionValue("i");
         if (!CtrlCheckService.isExistingFile(inFile)) {
             return;
         }
 
-        if (!RdfFileServiceJena.isValidRdfFile(inFile)) {
+        if (!RdfServiceSwitch.isValidRdfFile(inFile)) {
             return;
         }
 
@@ -140,7 +142,7 @@ public class LktCliController implements CliToolController {
         }
         final String defaultOutputFile = String.join("", AppUtils.getTimeStamp("yyyyMMddHHmm"), "_out");
 
-        LktReporterJena.runReport(inFile, queryString, cmd.getOptionValue("o", defaultOutputFile), outputFormat);
+        RdfServiceSwitch.runReport(inFile, queryString, cmd.getOptionValue("o", defaultOutputFile), outputFormat);
     }
 
 }
